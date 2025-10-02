@@ -1,0 +1,167 @@
+/* VELIESSA Luxury Fashion AI - Premium UI Styles */
+
+:root {
+  --veliessa-navy: #1a365d;
+  --veliessa-gold: #d4af37;
+  --veliessa-cream: #faf7f2;
+  --veliessa-gray: #f7fafc;
+  --veliessa-text: #2d3748;
+  --veliessa-accent: #4a5568;
+}
+
+@theme {
+  --color-veliessa-navy: var(--veliessa-navy);
+  --color-veliessa-gold: var(--veliessa-gold);
+  --color-veliessa-cream: var(--veliessa-cream);
+  --color-veliessa-gray: var(--veliessa-gray);
+  --color-veliessa-text: var(--veliessa-text);
+  --color-veliessa-accent: var(--veliessa-accent);
+}
+
+.veliessa-gradient {
+  background: linear-gradient(135deg, var(--veliessa-navy) 0%, #2c5282 100%);
+}
+
+.veliessa-gold-gradient {
+  background: linear-gradient(135deg, var(--veliessa-gold) 0%, #f6e05e 100%);
+}
+
+.veliessa-card {
+  @apply bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden;
+  transition: all 0.3s ease;
+}
+
+.veliessa-card:hover {
+  @apply shadow-xl;
+  transform: translateY(-2px);
+}
+
+.veliessa-button-primary {
+  @apply px-6 py-3 bg-veliessa-navy text-white rounded-lg font-medium;
+  @apply hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-veliessa-gold;
+  @apply transition-all duration-200;
+}
+
+.veliessa-button-secondary {
+  @apply px-6 py-3 border-2 border-veliessa-navy text-veliessa-navy rounded-lg font-medium;
+  @apply hover:bg-veliessa-navy hover:text-white focus:outline-none focus:ring-2 focus:ring-veliessa-gold;
+  @apply transition-all duration-200;
+}
+
+.veliessa-input {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg;
+  @apply focus:outline-none focus:ring-2 focus:ring-veliessa-gold focus:border-transparent;
+  @apply transition-all duration-200;
+}
+
+.veliessa-text-primary {
+  @apply text-veliessa-navy font-semibold;
+}
+
+.veliessa-text-secondary {
+  @apply text-veliessa-accent;
+}
+
+.veliessa-section {
+  @apply border-l-4 border-veliessa-gold pl-6 py-4;
+}
+
+.veliessa-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  @apply bg-veliessa-gold/20 text-veliessa-navy;
+}
+
+.veliessa-loading {
+  @apply inline-block w-4 h-4 border-2 border-veliessa-gold border-t-transparent rounded-full animate-spin;
+}
+
+/* Premium animations */
+@keyframes veliessa-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.veliessa-fade-in {
+  animation: veliessa-fade-in 0.5s ease-out;
+}
+
+@keyframes veliessa-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.veliessa-pulse {
+  animation: veliessa-pulse 2s infinite;
+}
+
+/* Luxury typography */
+.veliessa-heading-1 {
+  @apply text-4xl font-bold text-veliessa-navy leading-tight;
+  font-family: 'Playfair Display', serif;
+}
+
+.veliessa-heading-2 {
+  @apply text-2xl font-semibold text-veliessa-navy;
+  font-family: 'Inter', sans-serif;
+}
+
+.veliessa-body {
+  @apply text-veliessa-text leading-relaxed;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Custom scrollbar */
+.veliessa-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.veliessa-scrollbar::-webkit-scrollbar-track {
+  background: var(--veliessa-gray);
+}
+
+.veliessa-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--veliessa-gold);
+  border-radius: 3px;
+}
+
+.veliessa-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #b8941f;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .veliessa-heading-1 {
+    @apply text-3xl;
+  }
+  
+  .veliessa-card {
+    @apply mx-4;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --veliessa-navy: #2d3748;
+    --veliessa-text: #e2e8f0;
+    --veliessa-gray: #1a202c;
+  }
+  
+  .veliessa-card {
+    @apply bg-gray-800 border-gray-700;
+  }
+  
+  .veliessa-input {
+    @apply bg-gray-800 border-gray-600 text-white;
+  }
+}
