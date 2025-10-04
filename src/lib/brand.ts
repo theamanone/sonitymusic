@@ -50,7 +50,7 @@ export const BRAND: BrandMetadata = {
     { label: 'Accounts', url: 'https://account.veliessa.com' },
     { label: 'VEXA (blog/news)', url: 'https://vexa.veliessa.com' },
     { label: 'VEYRO (AI browser, WIP)', url: 'https://veyro.veliessa.com' },
-    { label: 'Cinevo (fashion AI)', url: 'https://cinevo.veliessa.com' },
+    { label: 'Sonity (music streaming)', url: 'https://sonity.veliessa.com' },
     { label: 'API', url: 'https://api.veliessa.com' },
     { label: 'CDN', url: 'https://cdn.veliessa.com' },
   ],

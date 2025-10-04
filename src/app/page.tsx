@@ -19,10 +19,12 @@ const mockTracks = [
     allowComments: true,
     explicit: false,
     language: 'punjabi',
-    audioUrl: '/uploads/Ranjheya Ve Zain Zohaib Yratta media.mp3',
+    audioUrl: '/api/v1/audio/hls/hls_test_track/playlist.m3u8',
     coverArt: {
       default: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop&crop=center',
       medium: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop&crop=center'
+      // default: '/uploads/Ranjheya-Ve-Punjabi-2022-20231130173851-500x500.jpg',
+      // medium: '/uploads/Ranjheya-Ve-Punjabi-2022-20231130173851-500x500.jpg'
     },
     lyrics: [],
     processingStatus: 'ready' as const,
@@ -77,7 +79,7 @@ const mockTracks = [
     allowComments: true,
     explicit: false,
     language: 'english',
-    audioUrl: '/uploads/sample-track-2.mp3',
+    audioUrl: '/api/v1/audio/stream/summer-vibes.mp3',
     coverArt: {
       default: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop&crop=center',
       medium: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop&crop=center'
@@ -127,48 +129,48 @@ const mockTracks = [
   {
     _id: '3',
     customTrackId: 'track-3',
-    title: 'Midnight Dreams',
-    description: 'Chill lo-fi beats for late night vibes',
-    tags: ['lo-fi', 'chill', 'instrumental'],
-    genre: 'electronic',
+    title: 'Saiyaara (8D Audio)',
+    description: '8D Audio experience of the beautiful track Saiyaara by Arijit Singh',
+    tags: ['8d-audio', 'bollywood', 'romantic', 'arijit-singh'],
+    genre: 'pop',
     privacy: 'public' as const,
     allowComments: true,
     explicit: false,
-    language: 'instrumental',
-    audioUrl: '/uploads/midnight-dreams.mp3',
+    language: 'hindi',
+    audioUrl: '/api/v1/audio/hls/saiyaara_8d/playlist.m3u8',
     coverArt: {
-      default: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300&h=300&fit=crop&crop=center',
-      medium: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop&crop=center'
+      default: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop&crop=center',
+      medium: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop&crop=center'
     },
     lyrics: [],
     processingStatus: 'ready' as const,
-    availableQualities: ['mp3'],
+    availableQualities: ['hls'],
     processingProgress: 100,
-    originalFileSize: 3500000,
-    duration: 210,
+    originalFileSize: 8500000,
+    duration: 285,
     drmEnabled: false,
     encryptionStatus: 'none' as const,
     artistId: 'artist-3',
     artistType: 'user' as const,
     contentType: 'track' as const,
-    plays: 5670,
-    uniquePlays: 4200,
-    likes: 324,
-    dislikes: 5,
-    comments: 18,
-    shares: 89,
-    averageRating: 4.7,
-    totalRatings: 98,
+    plays: 25680,
+    uniquePlays: 18900,
+    likes: 1250,
+    dislikes: 8,
+    comments: 89,
+    shares: 456,
+    averageRating: 4.9,
+    totalRatings: 567,
     listenTime: 0,
     completionRate: 0,
     skipRate: 0,
     moderationStatus: 'approved' as const,
     moderationFlags: [],
     contentWarnings: [],
-    slug: 'midnight-dreams-lofi',
-    searchTags: ['lo-fi', 'chill', 'instrumental'],
+    slug: 'saiyaara-8d-audio-arijit-singh',
+    searchTags: ['saiyaara', '8d', 'arijit', 'singh', 'bollywood'],
     trending: true,
-    featured: false,
+    featured: true,
     publishedAt: new Date(),
     version: 1,
     isLatest: true,
@@ -176,10 +178,10 @@ const mockTracks = [
     updatedAt: new Date().toISOString(),
     artistDetails: {
       _id: 'artist-3',
-      name: 'LoFi Master',
-      email: 'lofi@example.com',
-      avatar: '/images/default-artist.jpg',
-      verified: false
+      name: 'Arijit Singh',
+      email: 'arijit@example.com',
+      avatar: '/images/arijit-singh.jpg',
+      verified: true
     }
   },
   {
@@ -193,7 +195,7 @@ const mockTracks = [
     allowComments: true,
     explicit: false,
     language: 'english',
-    audioUrl: '/uploads/urban-nights.mp3',
+    audioUrl: '/api/v1/audio/stream/urban-nights.mp3',
     coverArt: {
       default: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop&crop=center',
       medium: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop&crop=center'
@@ -251,7 +253,7 @@ const mockTracks = [
     allowComments: true,
     explicit: false,
     language: 'instrumental',
-    audioUrl: '/uploads/acoustic-morning.mp3',
+    audioUrl: '/api/v1/audio/stream/acoustic-morning.mp3',
     coverArt: {
       default: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop&crop=center',
       medium: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop&crop=center'
@@ -309,7 +311,7 @@ const mockTracks = [
     allowComments: true,
     explicit: false,
     language: 'instrumental',
-    audioUrl: '/uploads/jazz-cafe.mp3',
+    audioUrl: '/api/v1/audio/stream/jazz-cafe.mp3',
     coverArt: {
       default: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300&h=300&fit=crop&crop=center',
       medium: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop&crop=center'
@@ -367,7 +369,7 @@ const mockTracks = [
     allowComments: true,
     explicit: false,
     language: 'english',
-    audioUrl: '/uploads/rock-anthem.mp3',
+    audioUrl: '/api/v1/audio/stream/rock-anthem.mp3',
     coverArt: {
       default: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop&crop=center',
       medium: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop&crop=center'
@@ -425,7 +427,7 @@ const mockTracks = [
     allowComments: true,
     explicit: false,
     language: 'instrumental',
-    audioUrl: '/uploads/classical-peace.mp3',
+    audioUrl: '/api/v1/audio/stream/classical-peace.mp3',
     coverArt: {
       default: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop&crop=center',
       medium: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop&crop=center'

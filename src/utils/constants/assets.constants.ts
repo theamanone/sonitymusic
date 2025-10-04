@@ -12,9 +12,9 @@ const getBaseUrl = () => {
 export const ASSETS = {
   // Logo variations
   LOGO: {
-    PRIMARY: '/assets/veliessa.png',
-    MONOCHROME: '/assets/veliessa.png',
-    FULL: "/assets/veliessa_lg.png",
+    PRIMARY: '/assets/sonity.png',
+    MONOCHROME: '/assets/sonity.png',
+    FULL: "/assets/sonity_lg.png",
   },
   FALLBACK: {
     USER: {

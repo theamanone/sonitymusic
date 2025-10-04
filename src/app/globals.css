@@ -19,6 +19,9 @@
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(255, 255, 255, 0.3);
   --shadow-glass: 0 32px 64px rgba(0, 0, 0, 0.08);
+  --ios-glass-light: rgba(255, 255, 255, 0.88);
+  --ios-glass-medium: rgba(255, 255, 255, 0.78);
+  --ios-glass-heavy: rgba(255, 255, 255, 0.92);
 }
 
 .dark {
@@ -33,6 +36,9 @@
   --glass-bg: rgba(18, 18, 18, 0.85);
   --glass-border: rgba(255, 255, 255, 0.1);
   --shadow-glass: 0 32px 64px rgba(0, 0, 0, 0.3);
+  --ios-glass-light: rgba(18, 18, 18, 0.88);
+  --ios-glass-medium: rgba(18, 18, 18, 0.78);
+  --ios-glass-heavy: rgba(18, 18, 18, 0.92);
 }
 
 @layer base {

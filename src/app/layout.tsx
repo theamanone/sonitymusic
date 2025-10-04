@@ -107,14 +107,15 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <script
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `(function() {
             try {
-              const stored = localStorage.getItem('sonity-theme-config') || localStorage.getItem('cinevo-theme-config');
-              const config = stored ? JSON.parse(stored) : { mode: 'system' };
+              const stored = localStorage.getItem('sonity-theme-config');
+              const config = stored ? JSON.parse(stored) : { mode: 'light' };
               const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
               
-              let resolvedMode = 'dark';
+              let resolvedMode = 'light';
               switch (config.mode) {
                 case 'system':
                   resolvedMode = systemDark ? 'dark' : 'light';
@@ -124,7 +125,7 @@ export default function RootLayout({
                   resolvedMode = (hour >= 6 && hour < 18) ? 'light' : 'dark';
                   break;
                 default:
-                  resolvedMode = config.mode;
+                  resolvedMode = config.mode || 'light';
               }
               
               document.documentElement.setAttribute('data-theme', resolvedMode);
@@ -135,12 +136,33 @@ export default function RootLayout({
                 document.documentElement.classList.add('theme-' + config.variant);
               }
             } catch (e) {
-              document.documentElement.setAttribute('data-theme', 'dark');
-              document.documentElement.classList.add('dark');
+              document.documentElement.setAttribute('data-theme', 'light');
+              document.documentElement.classList.add('light');
             }
           })();`,
           }}
         />
+        {typeof window !== 'undefined' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                if ('serviceWorker' in navigator && window.location.protocol === 'http:') {
+                  window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                      .then(registration => {
+                        console.log('SW registered successfully:', registration);
+                        // Force update for development
+                        registration.update();
+                      })
+                      .catch(error => console.error('SW registration failed:', error));
+                  });
+                } else {
+                  console.log('Service Worker not supported or not on HTTP');
+                }
+              `
+            }}
+          />
+        )}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

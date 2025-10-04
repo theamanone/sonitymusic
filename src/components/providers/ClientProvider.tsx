@@ -72,20 +72,18 @@ export default function ClientProvider({ children, session }: ClientProviderProp
         console.debug?.('[suppressed]', ...args);
         return;
       }
-
       originalError(...args);
     };
 
     if (isProd) {
       console.clear();
-      console.log('%c🎬 CINEVO Video Platform', 'color: #ff006e; font-size: 24px; font-weight: bold;');
-      console.log('%cUnauthorized access prohibited.', 'color: #ff006e; font-size: 14px;');
+      console.log('%c SONITY Music Platform', 'color: #8b5cf6; font-size: 24px; font-weight: bold');
+      console.log('%cUnauthorized access prohibited.', 'color: #8b5cf6; font-size: 14px');
     }
 
     return () => {
       if (anyConsole.__clipboardWrapped) {
         console.error = originalError;
-        delete anyConsole.__clipboardWrapped;
       }
     };
   }, [isProd]);
@@ -113,16 +111,15 @@ export default function ClientProvider({ children, session }: ClientProviderProp
 
   return (
     <ThemeProvider
-      defaultTheme="system"
+      defaultTheme="light"
       defaultVariant="default"
       enableSystem={true}
-      storageKey="cinevo-theme-config"
+      storageKey="sonity-theme-config"
     >
       <SessionProvider
         session={session}
         refetchOnWindowFocus={false}
         refetchWhenOffline={false}
-        refetchInterval={0}
       >
         {children}
         <GlobalAuthGate path={pathname} />

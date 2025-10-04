@@ -1,70 +1,26 @@
-// components/music-player/ExpandedPlayer.tsx - Clean UI with Thumbnail
+// components/music-player/ExpandedPlayer.tsx - Show App Header
 "use client";
 
 import { TrackWithArtist } from "@/types/track.types";
 import { PlayerState, PlayerActions } from "./types";
-
-// Fallback types if imports fail
-type FallbackPlayerState = {
-  isPlaying: boolean;
-  currentTime: number;
-  duration: number;
-  volume: number;
-  isMuted: boolean;
-  isLoading: boolean;
-  error: string | null;
-  isExpanded: boolean;
-  showLyrics: boolean;
-  isLiked: boolean;
-  currentLyricIndex: number;
-  isShuffled: boolean;
-  repeatMode: 'none' | 'all' | 'one'; // Fixed to match PlayerState
-  isDragging: boolean;
-  screenOffEnabled: boolean;
-  sleepTimer: number | null;
-};
-
-type FallbackPlayerActions = {
-  play: () => void;
-  pause: () => void;
-  togglePlayPause: () => void;
-  skipToNext: () => void;
-  skipToPrevious: () => void;
-  handleSeek: (time: number) => void;
-  setVolume: (volume: number) => void;
-  handleVolumeChange: (volume: number) => void;
-  toggleMute: () => void;
-  toggleExpanded: () => void;
-  toggleLyrics: () => void;
-  toggleLike: () => void;
-  toggleShuffle: () => void;
-  toggleRepeat: () => void;
-  cycleRepeatMode: () => void;
-  setSleepTimer: (minutes: number | null) => void;
-};
-
-import {
-  Mic2,
-  Heart,
-  Share2,
-  ChevronDown,
-  List,
-  FileText,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
-import PlayerControls from "./PlayerControls";
+import Image from "next/image";
+import { useViewportHeight } from "@/hooks/useViewportHeight";
+import { 
+  ChevronDown, List, Heart, Share2, Play, Pause, 
+  SkipBack, SkipForward, Shuffle, Repeat, Timer
+} from "lucide-react";
 import ProgressBar from "./ProgressBar";
-import LyricsView from "./LyricsView";
+import { useState, useEffect } from "react";
 
 interface ExpandedPlayerProps {
   track: TrackWithArtist | null;
-  state: PlayerState | FallbackPlayerState;
-  actions: PlayerActions | FallbackPlayerActions;
+  state: PlayerState;
+  actions: PlayerActions;
   onShare: () => void;
   onToggleQueue: () => void;
+  onShowTimer: () => void;
+  remainingTime: number | null;
   headerVisible?: boolean;
   swipeTransition?: boolean;
   className?: string;
@@ -76,157 +32,230 @@ export default function ExpandedPlayer({
   actions,
   onShare,
   onToggleQueue,
+  onShowTimer,
+  remainingTime,
   headerVisible = true,
   swipeTransition = false,
   className,
 }: ExpandedPlayerProps) {
+  // Measure available visual viewport height consistently
+  const viewportHeight = useViewportHeight();
+
+  // Compute album art size based on available height (keeps controls always visible)
+  // More conservative spacing for mobile, better proportions for desktop
+  const isMobile = viewportHeight && viewportHeight < 800;
+  const reservedVerticalSpace = isMobile ? 420 : 480;
+  const artSize = viewportHeight
+    ? Math.max(180, Math.min(isMobile ? 280 : 380, viewportHeight - reservedVerticalSpace))
+    : undefined;
+
+  if (!track) return null;
+
   return (
-    <div
-      className={cn(
-        "flex flex-col h-full music-control ios-gesture",
-        className
-      )}
-    >
-      <div className="flex-1 flex flex-col min-h-0 p-4 pb-4 sm:pb-8">
-        {/* Header - Conditional Visibility */}
-        <div className={cn(
-          "flex items-center justify-between mb-4 pt-4 sm:pt-8 z-10 relative backdrop-blur-sm rounded-b-2xl px-4 -mx-4 transition-all duration-300",
-          headerVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
-        )}>
-          <button
-            onClick={actions.toggleExpanded}
-            className="p-2 sm:p-3 rounded-2xl hover:bg-black/5 transition-colors cursor-pointer"
-          >
-            <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
-          </button>
-
-          <span className="text-xs font-bold text-gray-700 tracking-widest uppercase">
-            Now Playing
-          </span>
-
-          <div className="flex gap-1 sm:gap-2">
-            <button
-              onClick={onToggleQueue}
-              className="p-2 sm:p-3 rounded-2xl hover:bg-black/5 transition-colors cursor-pointer"
-            >
-              <List className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
-            </button>
-
-            <button
-              onClick={actions.toggleLyrics}
-              className={cn(
-                "p-2 sm:p-3 rounded-2xl transition-colors cursor-pointer",
-                state.showLyrics
-                  ? "bg-violet-100 text-violet-700"
-                  : "hover:bg-black/5 text-gray-700"
-              )}
-            >
-              <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
-            </button>
-          </div>
+    <div className={cn(
+      "relative grid grid-rows-[auto_1fr_auto_auto_auto] w-full overflow-hidden",
+      "pb-[calc(env(safe-area-inset-bottom,20px)+2.5rem)] sm:pb-[calc(env(safe-area-inset-bottom,20px)+1rem)]",
+      className
+    )} style={{
+      // Lock the expanded player height to the real visual viewport height when available
+      height: viewportHeight ? `${viewportHeight}px` : '100vh',
+      background: 'transparent'
+    }}>
+      {/* App Header - Responsive and Mobile Optimized */}
+      <div className={cn(
+        "relative z-30 transition-all duration-500 ease-out",
+        "pt-[env(safe-area-inset-top,20px)] px-4 sm:px-6",
+        "h-16 sm:h-20 flex items-center justify-between",
+        headerVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+      )}>
+        <button
+          onClick={actions.toggleExpanded}
+          className="p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          style={{ touchAction: 'manipulation' }}
+          aria-label="Collapse player"
+        >
+          <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-[var(--text-primary)]" />
+        </button>
+        
+        {/* App Logo/Name - Centered and Responsive */}
+        <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--accent-primary)]" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+          </svg>
+          <span className="text-[var(--text-primary)] text-base sm:text-lg font-bold">Sonity</span>
         </div>
 
-        {/* Main Content - Centered */}
-        <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 w-full">
-          {state.showLyrics ? (
-            <LyricsView currentIndex={state.currentLyricIndex} maxHeight={250} />
-          ) : (
-            <div className="mb-6 album-art-swipe-area">
-              <div className="relative w-48 h-48 sm:w-64 sm:h-64 rounded-3xl overflow-hidden shadow-2xl mx-auto transition-transform duration-300 ease-out">
-                {track ? (
-                  track.coverArt?.medium ? (
-                    <Image
-                      src={track.coverArt.medium}
-                      alt={track.title}
-                      fill
-                      priority
-                      sizes="(max-width: 640px) 192px, 256px"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                      {track.coverArt?.default ? (
-                        <Image
-                          src={track.coverArt.default}
-                          alt={track.title}
-                          fill
-                          className="object-cover"
-                          priority
-                          sizes="(max-width: 640px) 192px, 256px"
-                        />
-                      ) : (
-                        <Mic2 className="w-16 h-16 sm:w-20 sm:h-20 text-white/50" />
-                      )}
-                    </div>
-                  )
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                    <Mic2 className="w-16 h-16 sm:w-20 sm:h-20 text-white/50" />
-                  </div>
-                )}
+        <button
+          onClick={onToggleQueue}
+          className="p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          style={{ touchAction: 'manipulation' }}
+          aria-label="Open queue"
+        >
+          <List className="h-5 w-5 sm:h-6 sm:w-6 text-[var(--text-primary)]" />
+        </button>
+      </div>
+
+      {/* Album Art - Sized by available viewport height so controls stay visible */}
+      <div className="flex items-center justify-center px-4 sm:px-8 py-4 sm:py-8">
+        <div
+          className="album-art-swipe-area relative aspect-square"
+          style={{
+            width: artSize ? `${artSize}px` : undefined,
+            maxWidth: artSize ? `${artSize}px` : undefined,
+          }}
+        >
+          <div className="w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden relative shadow-lg">
+            {track?.coverArt?.default ? (
+              <Image
+                src={track.coverArt.default}
+                alt={track.title}
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 640px) 250px, (max-width: 1024px) 300px, 350px"
+              />
+            ) : (
+              <div className="w-full h-full bg-[var(--accent-primary)] flex items-center justify-center">
+                <svg className="w-16 h-16 sm:w-20 sm:h-20 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
               </div>
-            </div>
-          )}
-
-          {/* Track Info */}
-          {track && (
-            <div className="text-center mb-4 w-full px-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 line-clamp-2 drop-shadow-sm">
-                {track.title}
-              </h1>
-              <p className="text-base sm:text-lg text-gray-700 line-clamp-1 drop-shadow-sm">
-                {track.artistDetails?.name || 'Unknown Artist'}
-              </p>
-            </div>
-          )}
-          <div className="w-full mb-4 sm:mb-6">
-            <ProgressBar state={state} actions={actions} />
+            )}
           </div>
+        </div>
+      </div>
 
-          {/* Mobile Controls Layout */}
-          <div className="flex flex-col gap-3 w-full">
-            {/* Secondary Controls Row - Above Progress */}
-            <div className="flex items-center justify-between px-8 sm:px-12 mb-2">
-              {/* Left - Like Button */}
-              <button
-                onClick={actions.toggleLike}
-                className={cn(
-                  "p-2 rounded-xl transition-all cursor-pointer",
-                  state.isLiked
-                    ? "text-rose-600 bg-rose-100"
-                    : "text-gray-700 hover:bg-black/5"
-                )}
-              >
-                <Heart
-                  className={cn(
-                    "w-5 h-5",
-                    state.isLiked && "fill-current"
-                  )}
-                />
-              </button>
+      {/* Track Info - Grid Auto */}
+      <div className="px-4 sm:px-8 py-2 sm:py-3 text-center mx-auto max-w-[520px]">
+        <h1 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] mb-1 sm:mb-2 line-clamp-1">
+          {track.title}
+        </h1>
+        <p className="text-sm sm:text-base text-[var(--text-secondary)] line-clamp-1">
+          {track.artistDetails?.name || 'Unknown Artist'}
+        </p>
+      </div>
 
-              {/* Right - Share Button */}
-              <button
-                onClick={onShare}
-                className="p-2 rounded-xl text-gray-700 hover:bg-black/5 transition-all cursor-pointer"
-              >
-                <Share2 className="w-5 h-5" />
-              </button>
-            </div>
-            
-            {/* Main Player Controls - Center */}
-            <div className="flex justify-center">
-              <PlayerControls state={state} actions={actions} size="large" />
-            </div>
-            
-            {/* Track Progress Info */}
-            <div className="flex items-center justify-between text-sm text-gray-600 px-4 mt-2 drop-shadow-sm">
-              <span className="font-medium tabular-nums">{Math.floor(state.currentTime / 60)}:{String(Math.floor(state.currentTime % 60)).padStart(2, '0')}</span>
-              <span className="text-center flex-1 px-4 text-xs text-gray-500">
-                {track?.title || 'Unknown Track'} • {track?.artistDetails?.name || 'Unknown Artist'}
-              </span>
-              <span className="font-medium tabular-nums">{Math.floor(state.duration / 60)}:{String(Math.floor(state.duration % 60)).padStart(2, '0')}</span>
-            </div>
-          </div>
+      {/* Progress Bar - Grid Auto */}
+      <div className="px-4 sm:px-8 py-1 sm:py-2 mb-1 sm:mb-2 mx-auto max-w-[520px] w-full">
+        <ProgressBar
+          state={state}
+          actions={actions}
+          variant="full"
+        />
+      </div>
+
+      {/* Controls - Grid Auto with Proper Spacing (iOS-like layout) */}
+      <div className="px-4 sm:px-8 pb-6 sm:pb-8 pt-3 sm:pt-4 space-y-3 sm:space-y-5 mx-auto max-w-[520px] w-full">
+        {/* Secondary Controls - evenly spaced row */}
+        <div className="mx-auto w-full max-w-[380px] flex items-center justify-between">
+          <button
+            onClick={actions.toggleShuffle}
+            className={cn(
+              "p-3 rounded-2xl transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
+              "hover:bg-[var(--bg-secondary)]",
+              state.isShuffled ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)]"
+            )}
+            style={{ touchAction: 'manipulation' }}
+            aria-label="Shuffle"
+          >
+            <Shuffle className="h-5 w-5" />
+          </button>
+
+          <button
+            onClick={actions.toggleLike}
+            className={cn(
+              "p-3 rounded-2xl transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
+              "hover:bg-[var(--bg-secondary)]",
+              state.isLiked ? "text-red-500" : "text-[var(--text-secondary)]"
+            )}
+            style={{ touchAction: 'manipulation' }}
+            aria-label="Like"
+          >
+            <Heart className={cn(
+              "h-6 w-6",
+              state.isLiked && "fill-current"
+            )} />
+          </button>
+
+          <button
+            onClick={onShowTimer}
+            className={cn(
+              "p-3 rounded-2xl transition-colors relative min-w-[44px] min-h-[44px] flex items-center justify-center",
+              "hover:bg-[var(--bg-secondary)]",
+              remainingTime ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)]"
+            )}
+            style={{ touchAction: 'manipulation' }}
+            aria-label="Timer"
+          >
+            <Timer className="h-5 w-5" />
+            {remainingTime && (
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--accent-primary)] rounded-full" />
+            )}
+          </button>
+
+          <button
+            onClick={onShare}
+            className="p-3 rounded-2xl text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            style={{ touchAction: 'manipulation' }}
+            aria-label="Share"
+          >
+            <Share2 className="h-5 w-5" />
+          </button>
+
+          <button
+            onClick={actions.cycleRepeatMode}
+            className={cn(
+              "p-3 rounded-2xl relative transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
+              "hover:bg-[var(--bg-secondary)]",
+              state.repeatMode !== 'none' ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)]"
+            )}
+            style={{ touchAction: 'manipulation' }}
+            aria-label="Repeat"
+          >
+            <Repeat className="h-5 w-5" />
+            {state.repeatMode === 'one' && (
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent-primary)] rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">1</span>
+              </div>
+            )}
+          </button>
+        </div>
+
+        {/* Main Controls - centered within fixed width */}
+        <div className="mx-auto w-full max-w-[300px] flex items-center justify-center gap-4 sm:gap-6 mt-1 sm:mt-2">
+          <button
+            onClick={actions.skipToPrevious}
+            className="p-3 sm:p-4 rounded-2xl text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            style={{ touchAction: 'manipulation' }}
+            aria-label="Previous"
+          >
+            <SkipBack className="h-7 w-7 sm:h-8 sm:w-8" />
+          </button>
+
+          <button
+            onClick={actions.togglePlayPause}
+            disabled={state.isLoading}
+            className="p-4 sm:p-6 rounded-full text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors disabled:opacity-50 min-w-[56px] min-h-[56px] sm:min-w-[72px] sm:min-h-[72px] flex items-center justify-center"
+            style={{ touchAction: 'manipulation' }}
+            aria-label="Play/Pause"
+          >
+            {state.isLoading ? (
+              <div className="w-8 h-8 sm:w-10 sm:h-10 border-3 border-[var(--border-secondary)] border-t-[var(--text-primary)] rounded-full animate-spin" />
+            ) : state.isPlaying ? (
+              <Pause className="w-8 h-8 sm:w-10 sm:h-10" />
+            ) : (
+              <Play className="w-8 h-8 sm:w-10 sm:h-10" />
+            )}
+          </button>
+
+          <button
+            onClick={actions.skipToNext}
+            className="p-3 sm:p-4 rounded-2xl text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            style={{ touchAction: 'manipulation' }}
+            aria-label="Next"
+          >
+            <SkipForward className="h-7 w-7 sm:h-8 sm:w-8" />
+          </button>
         </div>
       </div>
     </div>

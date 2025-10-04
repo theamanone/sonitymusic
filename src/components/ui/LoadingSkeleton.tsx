@@ -15,7 +15,7 @@ export default function LoadingSkeleton({
   count = 1,
   animate = true 
 }: LoadingSkeletonProps) {
-  const baseClasses = `bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 ${
+  const baseClasses = `bg-gradient-to-r from-gray-200/40 via-gray-300/30 to-gray-200/40 dark:from-gray-700/40 dark:via-gray-600/30 dark:to-gray-700/40 ${
     animate ? 'animate-pulse' : ''
   }`;
 
@@ -151,40 +151,40 @@ export function HeroSkeleton({ className = '' }: { className?: string }) {
 export function MusicCardSkeleton({ className = '' }: { className?: string }) {
   return (
     <div className={`group relative cursor-pointer rounded-lg overflow-hidden transition-all duration-300 ${className}`}>
-      {/* Cover Art Skeleton with Glass Effect */}
-      <div className="aspect-square bg-gradient-to-br from-gray-300/80 via-gray-400/60 to-gray-300/80 animate-pulse rounded-lg backdrop-blur-sm border border-white/20 shadow-lg relative">
+      {/* Cover Art Skeleton with Very Subtle Glass Effect */}
+      <div className="aspect-square bg-gradient-to-br from-gray-200/20 via-gray-300/15 to-gray-200/20 dark:from-gray-700/20 dark:via-gray-600/15 dark:to-gray-700/20 animate-pulse rounded-lg backdrop-blur-sm border border-white/5 shadow-sm relative">
         {/* Play button overlay skeleton */}
-        <div className="absolute inset-0 bg-black/40 animate-pulse rounded-lg backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-black/5 dark:bg-white/2 animate-pulse rounded-lg backdrop-blur-sm" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-12 h-12 bg-green-500/60 animate-pulse rounded-full backdrop-blur-sm" />
+          <div className="w-12 h-12 bg-violet-500/15 dark:bg-violet-400/15 animate-pulse rounded-full backdrop-blur-sm" />
         </div>
 
         {/* Duration badge skeleton */}
-        <div className="absolute bottom-2 right-2 h-6 w-12 bg-black/60 animate-pulse rounded backdrop-blur-sm" />
+        <div className="absolute bottom-2 right-2 h-5 w-10 bg-black/15 dark:bg-white/8 animate-pulse rounded backdrop-blur-sm" />
       </div>
 
       {/* Content Info Skeleton */}
       <div className="p-3">
         {/* Title skeleton */}
-        <div className="h-4 bg-gradient-to-r from-gray-300/80 to-gray-400/60 animate-pulse rounded mb-2 backdrop-blur-sm" />
+        <div className="h-4 bg-gradient-to-r from-gray-200/30 to-gray-300/20 dark:from-gray-700/30 dark:to-gray-600/20 animate-pulse rounded mb-2 backdrop-blur-sm" />
 
         {/* Artist skeleton */}
-        <div className="h-3 bg-gradient-to-r from-gray-300/60 to-gray-400/40 animate-pulse rounded mb-3 w-3/4 backdrop-blur-sm" />
+        <div className="h-3 bg-gradient-to-r from-gray-200/25 to-gray-300/15 dark:from-gray-700/25 dark:to-gray-600/15 animate-pulse rounded mb-3 w-3/4 backdrop-blur-sm" />
 
         {/* Stats skeleton */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-3 bg-gradient-to-r from-gray-300/60 to-gray-400/40 animate-pulse rounded w-12 backdrop-blur-sm" />
-            <div className="h-3 bg-gradient-to-r from-gray-300/60 to-gray-400/40 animate-pulse rounded w-12 backdrop-blur-sm" />
+            <div className="h-3 bg-gradient-to-r from-gray-200/25 to-gray-300/15 dark:from-gray-700/25 dark:to-gray-600/15 animate-pulse rounded w-12 backdrop-blur-sm" />
+            <div className="h-3 bg-gradient-to-r from-gray-200/25 to-gray-300/15 dark:from-gray-700/25 dark:to-gray-600/15 animate-pulse rounded w-12 backdrop-blur-sm" />
           </div>
-          <div className="h-4 bg-gradient-to-r from-gray-300/80 to-gray-400/60 animate-pulse rounded-full w-16 backdrop-blur-sm" />
+          <div className="h-4 bg-gradient-to-r from-gray-200/30 to-gray-300/20 dark:from-gray-700/30 dark:to-gray-600/20 animate-pulse rounded-full w-16 backdrop-blur-sm" />
         </div>
       </div>
 
       {/* Hover actions skeleton */}
       <div className="absolute top-2 left-2 flex gap-2">
-        <div className="w-8 h-8 bg-black/60 animate-pulse rounded-full backdrop-blur-sm" />
-        <div className="w-8 h-8 bg-black/60 animate-pulse rounded-full backdrop-blur-sm" />
+        <div className="w-8 h-8 bg-black/15 dark:bg-white/8 animate-pulse rounded-full backdrop-blur-sm" />
+        <div className="w-8 h-8 bg-black/15 dark:bg-white/8 animate-pulse rounded-full backdrop-blur-sm" />
       </div>
     </div>
   );

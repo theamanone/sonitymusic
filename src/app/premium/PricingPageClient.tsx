@@ -1,6 +1,4 @@
 "use client";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import {
   SubscriptionProvider,
   type SubscriptionData,
@@ -8,7 +6,7 @@ import {
 import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import PricingCard from "@/components/PricingCard";
+import PremiumFeatures from "@/components/features/PremiumFeatures";
 
 type PlanKey = "free" | "basic" | "premium" | "pro";
 
@@ -19,47 +17,18 @@ type PricingQueuedChange = {
   effectiveAt: string;
 } | null;
 
-type PricingUsage = {
-  videosUploaded: number;
-  storageUsed: number;
-  videosWatched?: number;
-  totalWatchTime?: number;
-};
-
-type PricingPlan = any; // keep flexible; we normalize below
-
+// Simplified types for premium page
 export interface PricingData {
   currentPlan: string;
   status: string;
-  usage: PricingUsage;
-  plans: PricingPlan[];
+  usage: {
+    songsPlayed: number;
+    playlistsCreated: number;
+    totalListeningTime?: number;
+    offlineDownloads?: number;
+  };
+  plans: any[];
   queuedChange: PricingQueuedChange;
-}
-
-export interface UIPlan {
-  key: string;
-  name: string;
-  description?: string;
-  features: string[];
-  priceMonthly: number;
-  priceYearly?: number;
-  currency: string;
-  // Video platform specific limits
-  videosPerMonth: number;
-  maxVideoLength: number;
-  maxStorageGB: number;
-  // Feature flags
-  canAccessPremium: boolean;
-  canUploadHD: boolean;
-  canUpload4K: boolean;
-  canCreatePlaylist: boolean;
-  canComment: boolean;
-  canDownload: boolean;
-  adsEnabled: boolean;
-  // UI properties
-  active: boolean;
-  sortOrder?: number;
-  popular?: boolean;
 }
 
 // 🚀 Updated PricingData interface with queuedChange
@@ -95,92 +64,19 @@ function PricingPageContent({ data }: Props) {
   const initialSubscription: SubscriptionData = {
     plan: data.currentPlan,
     status: data.status || "active",
-    videosUploaded: data.usage.videosUploaded,
-    storageUsed: data.usage.storageUsed,
-    canWatchAdFree:
-      data.plans.find((p: any) => p.name === data.currentPlan)?.platformFeatures
-        ?.adsEnabled === false,
-    canUploadHD:
-      data.plans.find((p: any) => p.name === data.currentPlan)?.platformFeatures
-        ?.maxVideoQuality === "1080p",
-    canUpload4K:
-      data.plans.find((p: any) => p.name === data.currentPlan)?.platformFeatures
-        ?.maxVideoQuality === "4K",
-    canAccessPremium:
-      data.plans.find((p: any) => p.name === data.currentPlan)?.contentAccess
-        ?.premiumMovies || false,
-  };
-
-  // ✅ FIXED: Proper data transformation for PricingCard
-  const transformedPlans = data.plans.map((plan: any) => ({
-    name: plan.name,
-    displayName: plan.displayName,
-    description: plan.description,
-    tagline: plan.tagline,
-    tier: plan.tier,
-    features: plan.features || [],
-    benefits: plan.benefits || [],
-    pricing: plan.pricing || { monthly: 0, yearly: 0, currency: "USD" },
-    contentAccess: plan.contentAccess || {
-      regularVideos: true,
-      premiumMovies: false,
-      exclusiveSeries: false,
-      originalContent: false,
-    },
-    platformFeatures: plan.platformFeatures || {
-      adsEnabled: true,
-      maxVideoQuality: "720p",
-      maxConcurrentStreams: 1,
-      offlineDownloads: false,
-      maxOfflineDownloads: 0,
-      customThumbnails: false,
-      liveStreaming: false,
-      monetization: false,
-      advancedAnalytics: false,
-      prioritySupport: false,
-      betaFeatures: false,
-    },
-    popular: plan.popular || false,
-    exclusive: plan.exclusive || false,
-    ui: plan.ui || {
-      colorTheme: "#6B46C1",
-      gradientFrom: "#6B46C1",
-      gradientTo: "#8B5CF6",
-    },
-  }));
-
-  // Adapt data for PricingCard expected types
-  const usageForCard = {
-    promptsUsed: 0,
-    promptsLimit: 0,
-    remaining: 0,
-    canPrompt: true,
-    resetTime: null as Date | null,
-    videosUploaded: data.usage.videosUploaded,
-    storageUsed: data.usage.storageUsed,
+    videosUploaded: 0,
+    storageUsed: 0,
+    canWatchAdFree: data.currentPlan !== "free",
+    canUploadHD: true,
+    canUpload4K: data.currentPlan === "premium" || data.currentPlan === "pro",
+    canAccessPremium: data.currentPlan !== "free",
   };
 
   
   return (
-    <>
-      <SubscriptionProvider initial={initialSubscription} disableAutoFetch>
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
-          <Header />
-          <main className="container mx-auto py-6 md:py-12 px-4 pt-20 md:pt-12">
-            <PricingCard
-              currentPlan={data.currentPlan as PlanKey}
-              usage={{
-                videosUploaded: data.usage.videosUploaded,
-                storageUsed: data.usage.storageUsed,
-              }}
-              plans={transformedPlans}
-              queuedChange={data.queuedChange}
-            />
-          </main>
-          <Footer />
-        </div>
-      </SubscriptionProvider>
-    </>
+    <SubscriptionProvider initial={initialSubscription} disableAutoFetch>
+      <PremiumFeatures />
+    </SubscriptionProvider>
   );
 }
 

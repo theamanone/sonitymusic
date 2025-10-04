@@ -1,5 +1,4 @@
 // lib/storage/private-storage.ts - Private Audio Storage Manager
-"use server";
 
 import { mkdir, writeFile, readFile, unlink, access, readdir } from 'fs/promises';
 import { join } from 'path';

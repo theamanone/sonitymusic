@@ -13,9 +13,62 @@
 # testing
 /coverage
 
-
-# data of hls formaat 
+# private storage and data
+/private
 /data
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.m4a
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.flv
+*.wmv
+
+# HLS chunks and segments (video/audio .ts files, not TypeScript)
+/public/uploads/hls/**/*.ts
+/private/audio/**/*.ts
+*.m3u8
+/public/uploads/hls
+/public/uploads/*.mp3
+/public/uploads/*.wav
+/public/uploads/*.flac
+/public/uploads/*.aac
+/public/uploads/*.mp4
+/public/uploads/*.avi
+/public/uploads/*.mov
+/public/uploads/*.mkv
+/public/uploads/*.webm
+/public/uploads/*.flv
+/public/uploads/*.wmv
+
+# Large files (>50MB) - prevent accidental commits of large assets
+/public/uploads/**/*
+!/public/uploads/.gitkeep
+
+# Image files (keep smaller ones, ignore very large ones)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.webp
+*.svg
+/public/uploads/*.jpg
+/public/uploads/*.jpeg
+/public/uploads/*.png
+/public/uploads/*.gif
+/public/uploads/*.bmp
+/public/uploads/*.tiff
+/public/uploads/*.webp
+/public/uploads/*.svg
+
 # next.js
 /.next/
 /out/
@@ -42,3 +95,62 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Large file size limit (GitHub recommendation)
+# Files larger than 100MB will be rejected
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.bz2
+*.xz
+/public/uploads/**/*.zip
+/public/uploads/**/*.rar
+/public/uploads/**/*.7z
+/public/uploads/**/*.tar
+/public/uploads/**/*.gz
+/public/uploads/**/*.bz2
+/public/uploads/**/*.xz

@@ -19,8 +19,11 @@ import {
   Crown,
   Bell,
   ChevronRight,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 interface MobileSidebarProps {
   isOpen: boolean;
@@ -29,6 +32,7 @@ interface MobileSidebarProps {
 
 export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const { data: session } = useSession();
+  const { isDark, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -62,39 +66,58 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   ];
 
   return (
-    <>
+    <div className="z-[100]">
       {/* Backdrop */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-[250] bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+          className="fixed inset-0 z-[140] bg-black/40 backdrop-blur-sm transition-opacity duration-300"
           onClick={onClose}
         />
       )}
 
-      {/* Sidebar */}
+      {/* iOS 26 Glass Morphism Sidebar */}
       <div className={cn(
-        "fixed top-0 right-0 h-full w-80 max-w-[85vw] z-[300] transform transition-transform duration-300 ease-out",
-        "bg-white/95 backdrop-blur-3xl border-l border-gray-200/50 shadow-2xl",
+        "fixed top-0 right-0 h-full w-80 max-w-[85vw] z-[190] transform transition-transform duration-300 ease-out",
         isOpen ? "translate-x-0" : "translate-x-full"
-      )}>
-        <div className="flex flex-col h-full">
+      )}
+      style={{
+        background: isDark 
+          ? 'rgba(17, 24, 39, 0.95)' 
+          : 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(30px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+        borderLeft: isDark
+          ? '1px solid rgba(156, 163, 175, 0.15)'
+          : '1px solid rgba(229, 231, 235, 0.3)',
+        boxShadow: '-10px 0 40px rgba(0, 0, 0, 0.1)'
+      }}>
+        <div className="flex flex-col h-full relative z-10">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
+          <div className="flex items-center justify-between p-6 border-b" style={{
+            borderColor: isDark ? 'rgba(156, 163, 175, 0.15)' : 'rgba(229, 231, 235, 0.3)'
+          }}>
             <div className="flex items-center gap-3">
               <Image
                 src={ASSETS.LOGO.PRIMARY}
                 alt="Sonity"
                 width={32}
                 height={32}
+                style={{ width: 'auto', height: 'auto' }}
                 className="rounded-lg"
               />
-              <span className="text-xl font-bold text-gray-900">Sonity</span>
+              <span className={cn(
+                "text-xl font-bold",
+                isDark ? "text-white" : "text-gray-900"
+              )}>Sonity</span>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+              className={cn(
+                "p-2 rounded-xl transition-colors",
+                isDark ? "hover:bg-white/10 text-gray-300" : "hover:bg-gray-100 text-gray-600"
+              )}
             >
-              <X className="w-5 h-5 text-gray-600" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
@@ -137,7 +160,10 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
           {/* Navigation */}
           <div className="flex-1 p-6 space-y-2">
-            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">
+            <h3 className={cn(
+              "text-xs font-bold uppercase tracking-wider mb-4",
+              isDark ? "text-gray-400" : "text-gray-500"
+            )}>
               Navigation
             </h3>
             {navigationItems.map((item) => (
@@ -145,10 +171,23 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors group"
+                className={cn(
+                  "flex items-center gap-4 p-4 rounded-2xl transition-colors group",
+                  isDark ? "hover:bg-white/10" : "hover:bg-gray-50"
+                )}
               >
-                <item.icon className="w-5 h-5 text-gray-600 group-hover:text-violet-600 transition-colors" />
-                <span className="font-medium text-gray-900 group-hover:text-violet-600 transition-colors">
+                <item.icon className={cn(
+                  "w-5 h-5 transition-colors",
+                  isDark 
+                    ? "text-gray-400 group-hover:text-violet-400" 
+                    : "text-gray-600 group-hover:text-violet-600"
+                )} />
+                <span className={cn(
+                  "font-medium transition-colors",
+                  isDark 
+                    ? "text-gray-200 group-hover:text-violet-400" 
+                    : "text-gray-900 group-hover:text-violet-600"
+                )}>
                   {item.label}
                 </span>
               </Link>
@@ -157,6 +196,29 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
           {/* Bottom Actions */}
           <div className="p-6 border-t border-gray-200/50 space-y-2">
+            {/* Theme Toggle - Always visible */}
+            <button
+              onClick={toggleTheme}
+              className={cn(
+                "flex items-center gap-4 p-4 w-full rounded-2xl transition-all",
+                isDark 
+                  ? "bg-gray-800 hover:bg-gray-700 text-white"
+                  : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+              )}
+            >
+              {isDark ? (
+                <>
+                  <Sun className="w-5 h-5 text-yellow-400" />
+                  <span className="font-medium">Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-5 h-5 text-indigo-600" />
+                  <span className="font-medium">Dark Mode</span>
+                </>
+              )}
+            </button>
+
             <Link
               href="/premium"
               onClick={onClose}
@@ -177,6 +239,6 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

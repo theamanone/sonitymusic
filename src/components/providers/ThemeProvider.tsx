@@ -41,10 +41,27 @@ interface ThemeProviderProps {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 // ✅ HYDRATION-SAFE SCRIPT
-const THEME_SCRIPT = `
+const THEME_SCRIPT = (storageKey: string) => `
 (function() {
   try {
-    const stored = localStorage.getItem('cinevo-theme-config');
+    // Try to get theme from new storage key first
+    let stored = localStorage.getItem(storageKey);
+    
+    // If not found, try to migrate from old key
+    if (!stored) {
+      // Migration from old theme keys
+      const oldKeys = ['cinevo-theme-config', 'veliessa-theme-config'];
+      for (const oldKey of oldKeys) {
+        const oldStored = localStorage.getItem(oldKey);
+        if (oldStored) {
+          localStorage.setItem(storageKey, oldStored);
+          stored = oldStored;
+          localStorage.removeItem(oldKey);
+          break;
+        }
+      }
+    }
+    
     const config = stored ? JSON.parse(stored) : { mode: 'system', variant: 'default' };
     
     let resolvedMode = 'dark';
@@ -80,7 +97,7 @@ function getStoredConfig(): ThemeConfig {
   }
 
   try {
-    const stored = localStorage.getItem('cinevo-theme-config');
+    const stored = localStorage.getItem('sonity-theme-config');
     if (stored) {
       const parsed = JSON.parse(stored);
       return {
@@ -126,7 +143,7 @@ export function ThemeProvider({
   defaultTheme = 'system',
   defaultVariant = 'default',
   enableSystem = true,
-  storageKey = 'cinevo-theme-config',
+  storageKey = 'sonity-theme-config',
   forcedTheme
 }: ThemeProviderProps) {
   const [mounted, setMounted] = useState(false);
@@ -165,13 +182,13 @@ export function ThemeProvider({
       root.style.removeProperty('--text-primary');
     }
     
-    localStorage.setItem('cinevo-theme-config', JSON.stringify(config));
+    localStorage.setItem('sonity-theme-config', JSON.stringify(config));
   }, [mounted, config, resolvedTheme, isDark]);
 
   const updateConfig = (updates: Partial<ThemeConfig>) => {
     setConfig(prev => {
       const newConfig = { ...prev, ...updates };
-      localStorage.setItem('cinevo-theme-config', JSON.stringify(newConfig));
+      localStorage.setItem('sonity-theme-config', JSON.stringify(newConfig));
       return newConfig;
     });
   };
@@ -191,27 +208,28 @@ export function ThemeProvider({
 
   if (!mounted) {
     return (
-      <ThemeContext.Provider value={{
-        theme: 'system',
-        variant: 'default',
-        isDark: true,
-        isLight: false,
-        mounted: false,
-        setTheme: () => {},
-        setVariant: () => {},
-        toggleTheme: () => {},
-        updateConfig: () => {},
-        currentTheme: config,
-        themeClasses: 'theme-dark variant-default theme-loading'
-      }}>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-        <div className="theme-dark variant-default theme-loading">
+      <ThemeContext.Provider
+        value={{
+          theme: forcedTheme || config.mode,
+          variant: config.variant,
+          isDark: forcedTheme ? forcedTheme === 'dark' : isDark,
+          isLight: forcedTheme ? forcedTheme === 'light' : !isDark,
+          mounted,
+          setTheme,
+          setVariant,
+          toggleTheme,
+          updateConfig,
+          currentTheme: config,
+          themeClasses: `theme-${forcedTheme || config.mode} variant-${config.variant} ${mounted ? '' : 'theme-loading'}`
+        }}
+      >
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT(storageKey) }} />
+        <div className={`theme-${forcedTheme || (mounted ? config.mode : 'light')} variant-${config.variant} ${mounted ? '' : 'theme-loading'}`}>
           {children}
         </div>
       </ThemeContext.Provider>
     );
   }
-
   return (
     <ThemeContext.Provider value={{
       theme: config.mode,
@@ -226,7 +244,7 @@ export function ThemeProvider({
       currentTheme: config,
       themeClasses
     }}>
-      <div className={`cinevo-theme-root ${themeClasses}`}>
+      <div className={`sonity-theme-root ${themeClasses}`}>
         {children}
       </div>
     </ThemeContext.Provider>

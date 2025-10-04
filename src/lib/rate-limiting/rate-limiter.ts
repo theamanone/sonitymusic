@@ -1,5 +1,4 @@
 // lib/rate-limiting/rate-limiter.ts - Advanced Rate Limiting System
-"use server";
 
 import { headers } from 'next/headers';
 
@@ -90,9 +89,10 @@ class RateLimiter {
   /**
    * Get client identifier from request
    */
-  getClientIdentifier(req?: any): string {
+  async getClientIdentifier(): Promise<string> {
     try {
-      const headersList = headers();
+      // In API routes, headers() returns a Promise
+      const headersList = await headers();
       
       // Try to get real IP from various headers
       const forwarded = headersList.get('x-forwarded-for');
@@ -226,11 +226,11 @@ export const rateLimiter = new RateLimiter();
  */
 export async function withRateLimit(
   rule: RateLimitRule,
-  handler: Function,
+  handler: () => Promise<Response>,
   customIdentifier?: string
 ) {
   try {
-    const identifier = customIdentifier || rateLimiter.getClientIdentifier();
+    const identifier = customIdentifier || await rateLimiter.getClientIdentifier();
     const result = await rateLimiter.checkRateLimit(identifier, rule);
 
     if (!result.allowed) {

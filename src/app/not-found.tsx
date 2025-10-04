@@ -17,12 +17,12 @@ function NotFoundContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-red-900 flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-fuchsia-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center px-4 relative overflow-hidden">
+      {/* iOS 26 Glass Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-red-500/5 to-purple-500/5 rounded-full blur-3xl animate-spin-slow"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-fuchsia-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-violet-500/5 to-fuchsia-500/5 rounded-full blur-3xl animate-spin-slow"></div>
       </div>
 
       {/* Floating Particles */}
@@ -42,13 +42,13 @@ function NotFoundContent() {
       </div>
 
       <div className="max-w-2xl w-full text-center relative z-10">
-        {/* Premium Logo */}
+        {/* Sonity Logo */}
         <div className="mb-12">
           <div className="relative mx-auto w-32 h-32">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-purple-600 to-red-600 rounded-3xl blur-xl opacity-60 animate-pulse"></div>
-            <div className="relative w-full h-full bg-gradient-to-r from-red-600 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-3xl blur-xl opacity-60 animate-pulse"></div>
+            <div className="relative w-full h-full bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-3xl flex items-center justify-center shadow-2xl backdrop-blur-xl border border-white/20">
               <div className="flex items-center space-x-1">
-                <Film className="w-8 h-8 text-white" />
+                <Play className="w-8 h-8 text-white" />
                 <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
               </div>
             </div>
@@ -58,19 +58,19 @@ function NotFoundContent() {
         {/* Premium Error Display */}
         <div className="mb-12">
           <div className="relative">
-            <h1 className="text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-purple-400 to-red-400 mb-6 animate-gradient-x">
+            <h1 className="text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-400 to-fuchsia-400 mb-6 animate-gradient-x">
               404
             </h1>
-            <div className="absolute -inset-1 bg-gradient-to-r from-red-600/20 to-purple-600/20 blur-xl rounded-lg"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 blur-xl rounded-lg"></div>
           </div>
           
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
-            Content Not Found
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
+            Track Not Found
           </h2>
           
-          <p className="text-xl text-gray-300 leading-relaxed max-w-lg mx-auto">
-            The premium content you're looking for has moved to a different dimension. 
-            Let's get you back to the main experience.
+          <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-lg mx-auto">
+            The music you're looking for might have been moved or doesn't exist. 
+            Let's get you back to discovering amazing tracks.
           </p>
         </div>
 

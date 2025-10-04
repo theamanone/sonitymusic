@@ -46,6 +46,7 @@ export const Header: React.FC = () => {
                 alt={`${SITE_CONFIG.SHORT_NAME} Logo`}
                 width={32}
                 height={32}
+                style={{ width: 'auto', height: 'auto' }}
                 className="w-8 h-8 transition-transform duration-200 group-hover:scale-105"
                 priority
               />
