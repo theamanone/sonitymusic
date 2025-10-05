@@ -49,7 +49,7 @@ function getCurrentContentCategory(): string {
 
 function getViewingPreferences(): any {
     try {
-        return JSON.parse(localStorage.getItem('cinevo_viewing_prefs') || '{}');
+        return JSON.parse(localStorage.getItem('sonity_viewing_prefs') || '{}');
     } catch {
         return {};
     }
@@ -72,7 +72,7 @@ function calculateChurnRisk(user: any): string {
 
 function getPersonalizationData(): any {
     try {
-        return JSON.parse(localStorage.getItem('cinevo_personalization') || '{}');
+        return JSON.parse(localStorage.getItem('sonity_personalization') || '{}');
     } catch {
         return {};
     }
@@ -80,7 +80,7 @@ function getPersonalizationData(): any {
 
 function detectPreferredPaymentMethod(): string {
     try {
-        const savedMethod = localStorage.getItem('cinevo_preferred_payment');
+        const savedMethod = localStorage.getItem('sonity_preferred_payment');
         const userAgent = navigator.userAgent.toLowerCase();
         const isMobile = /mobile|android|ios/.test(userAgent);
 
@@ -138,11 +138,11 @@ function trackEvent(eventName: string, properties: any) {
         }
 
         // Custom analytics
-        if ((window as any).cinevoAnalytics) {
-            (window as any).cinevoAnalytics.track(eventName, properties);
+        if ((window as any).sonityAnalytics) {
+            (window as any).sonityAnalytics.track(eventName, properties);
         }
 
-        console.log(` CINEVO Event: ${eventName}`, properties);
+        console.log(` SONITY Event: ${eventName}`, properties);
     } catch (error) {
         console.warn('Analytics tracking failed:', error);
     }
@@ -200,7 +200,7 @@ function updateUserPersonalization(planKey: string, platformType: string) {
             platform_type: platformType,
             upgraded_at: new Date().toISOString()
         };
-        localStorage.setItem('cinevo_personalization', JSON.stringify(updatedPrefs));
+        localStorage.setItem('sonity_personalization', JSON.stringify(updatedPrefs));
     } catch (error) {
         console.warn('Failed to update personalization:', error);
     }
@@ -236,7 +236,7 @@ function createSupportTicket(response: any, error: any, user: any) {
 }
 
 // MAIN CONFIGURATION FUNCTION
-const createCinevoRazorpayConfig = (
+const createSonityRazorpayConfig = (
     orderData: any,
     session: any,
     planKey: string,
@@ -246,12 +246,12 @@ const createCinevoRazorpayConfig = (
     setLocalQueued: (v: any) => void
 ): any => {
 
-    // CINEVO BRANDING & PLATFORM DETECTION
+    // SONITY BRANDING & PLATFORM DETECTION
     const platformConfig = {
-        main: { name: 'CINEVO by VELIESSA', logo: 'http://localhost:3000/assets/veliessa.png' },
+        main: { name: 'SONITY by VELIESSA', logo: 'http://localhost:3000/assets/veliessa.png' },
         fashion: { name: 'VELIESSA Fashion Studio', logo: 'http://localhost:3000/assets/veliessa.png' },
-        premium: { name: 'CINEVO Premium', logo: 'http://localhost:3000/assets/veliessa.png' },
-        creator: { name: 'CINEVO Creator Studio', logo: 'http://localhost:3000/assets/veliessa.png' }
+        premium: { name: 'SONITY Premium', logo: 'http://localhost:3000/assets/veliessa.png' },
+        creator: { name: 'SONITY Creator Studio', logo: 'http://localhost:3000/assets/veliessa.png' }
     } as const;
   
     const currentDomain = typeof window !== 'undefined' ? window.location.hostname : '';
@@ -273,7 +273,7 @@ const createCinevoRazorpayConfig = (
     };
   
     const currentConfig = planConfigs[planKey] || planConfigs.basic;
-    const planDisplayName = `${currentConfig.emoji} CINEVO ${currentConfig.tier}`;
+    const planDisplayName = `${currentConfig.emoji} SONITY ${currentConfig.tier}`;
   
     // 🌟 ULTRA-PREMIUM RAZORPAY CONFIGURATION
     return {
@@ -285,7 +285,7 @@ const createCinevoRazorpayConfig = (
       
       // 🎨 PREMIUM BRANDING & UI CUSTOMIZATION
       name: branding.name,
-      description: `${planDisplayName} • Premium Video Streaming & Fashion Content`,
+      description: `${planDisplayName} • Premium Music Streaming & Content`,
       image: branding.logo,
       
       // 🎭 ADVANCED THEME CUSTOMIZATION - RAZORPAY UI ONLY
@@ -310,7 +310,7 @@ const createCinevoRazorpayConfig = (
         user_id: session?.user?.id || 'anonymous',
         user_tier: session?.user?.tier || 'free',
         session_id: generateSessionId(),
-        platform: 'cinevo_video',
+        platform: 'sonity_music',
         subdomain: subdomain,
         plan_key: planKey,
         plan_tier: currentConfig.tier,
@@ -434,7 +434,7 @@ const createCinevoRazorpayConfig = (
             amount: orderData?.amount
           });
   
-          console.log('💎 CINEVO Payment Success:', response);
+          console.log('💎 SONITY Payment Success:', response);
           
           // 🔒 ENHANCED VERIFICATION
           const verifyResponse = await fetch('/api/v1/subscription/verify', {
@@ -442,7 +442,7 @@ const createCinevoRazorpayConfig = (
             headers: { 
               'Content-Type': 'application/json',
               'X-Requested-With': 'XMLHttpRequest',
-              'X-Platform': 'cinevo',
+              'X-Platform': 'sonity',
               'X-Subdomain': subdomain,
               'X-Brand': 'veliessa'
             },
@@ -467,7 +467,7 @@ const createCinevoRazorpayConfig = (
           if (verifyResult.success) {
             showAdvancedToast(
               `🎬 Welcome to ${planDisplayName}!`,
-              `Your premium CINEVO experience starts now. Enjoy exclusive content!`,
+              `Your premium SONITY experience starts now. Enjoy exclusive content!`,
               'success'
             );
   
@@ -497,7 +497,7 @@ const createCinevoRazorpayConfig = (
           if (verifyingToast && typeof toast !== 'undefined') {
             toast.dismiss(verifyingToast);
           }
-          console.error('❌ CINEVO Verification Failed:', error);
+          console.error('❌ SONITY Verification Failed:', error);
           
           trackEvent('payment_verification_failed', {
             error: error.message,
@@ -523,7 +523,7 @@ const createCinevoRazorpayConfig = (
       // ❌ ADVANCED ERROR HANDLER
       error: function(error: any) {
 
-        console.error('💥 CINEVO Payment Error:', error);
+        console.error('💥 SONITY Payment Error:', error);
         
         trackEvent('payment_failed', {
           error_code: error.code,
@@ -577,4 +577,4 @@ const createCinevoRazorpayConfig = (
   };
   
   // 🚀 EXPORT THE CONFIGURATION FUNCTION
-  export default createCinevoRazorpayConfig;
+  export default createSonityRazorpayConfig;

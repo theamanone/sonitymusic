@@ -23,7 +23,7 @@ export const RAZORPAY_CONFIG = {
 
 export class RazorpayService {
   /**
-   * Create Razorpay order for subscription (Cinevo pattern)
+   * Create Razorpay order for subscription (Sonity pattern)
    */
 // utils/razorpay.service.ts - ENHANCED createOrder method
 static async createOrder(userId: string, planKey: string) {
@@ -137,7 +137,7 @@ static async createOrder(userId: string, planKey: string) {
         currency: forceInr && currency === "USD" ? "INR" : currency,
         status: "pending",
         plan: planKey,
-        description: `Video Platform ${planDoc.displayName || planDoc.name} Plan - Subscription`,
+        description: `Music Platform ${planDoc.displayName || planDoc.name} Plan - Subscription`,
       });
     } catch (e: any) {
       if (e && (e.code === 11000 || e?.name === "MongoServerError")) {
@@ -152,7 +152,7 @@ static async createOrder(userId: string, planKey: string) {
       amount,
       currency: forceInr && currency === "USD" ? "INR" : currency,
       key: process.env.RAZORPAY_KEY_ID,
-      name: "Video Platform",
+      name: "Music Platform",
       description: `${planDoc.displayName || planDoc.name} Plan`,
       ...(display_currency ? { display_currency } : {}),
       ...(typeof display_amount === "number" ? { display_amount } : {}),
@@ -193,7 +193,7 @@ static async createOrder(userId: string, planKey: string) {
   }
 
   /**
-   * Handle successful payment (Cinevo pattern)
+   * Handle successful payment (Sonity pattern)
    */
   static async handlePaymentSuccess(
     userId: string,
@@ -255,8 +255,8 @@ static async createOrder(userId: string, planKey: string) {
             currency: currencyFromOrder || undefined,
             plan: planFromOrder || "pro",
             description: planFromOrder
-              ? `Cinevo ${planFromOrder} Plan - Video Subscription`
-              : "Cinevo Subscription",
+              ? `Sonity ${planFromOrder} Plan - Music Subscription`
+              : "Sonity Subscription",
           },
         },
         { new: true, upsert: true }
@@ -478,8 +478,8 @@ static async createOrder(userId: string, planKey: string) {
       const storageGB = totalStorage / (1024 * 1024 * 1024);
 
       return {
-        monthlyVideos: monthlyTracks,
-        totalVideos: totalTracks,
+        monthlySongs: monthlyTracks,
+        totalSongs: totalTracks,
         storageUsedGB: storageGB,
         storageUsedBytes: totalStorage,
         currentMonth: currentMonth.toISOString(),
@@ -487,8 +487,8 @@ static async createOrder(userId: string, planKey: string) {
     } catch (error) {
       console.error("Error getting subscription usage:", error);
       return {
-        monthlyVideos: 0,
-        totalVideos: 0,
+        monthlySongs: 0,
+        totalSongs: 0,
         storageUsedGB: 0,
         storageUsedBytes: 0,
         currentMonth: new Date().toISOString(),

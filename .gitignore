@@ -16,12 +16,16 @@
 # private storage and data
 /private
 /data
+# Music files (ignore all audio files as they're licensed content)
+/public/audio/**/*.*
+/private/audio/**/*.*
 *.mp3
 *.wav
 *.flac
 *.aac
 *.ogg
 *.m4a
+# Video files (ignore all video files as they're licensed content)
 *.mp4
 *.avi
 *.mov
@@ -30,24 +34,12 @@
 *.flv
 *.wmv
 
-# HLS chunks and segments (video/audio .ts files, not TypeScript)
-/public/uploads/hls/**/*.ts
-/private/audio/**/*.ts
+# HLS streaming files (for licensed content)
+/public/streams/**/*.ts
+/private/streams/**/*.ts
 *.m3u8
-/public/uploads/hls
-/public/uploads/*.mp3
-/public/uploads/*.wav
-/public/uploads/*.flac
-/public/uploads/*.aac
-/public/uploads/*.mp4
-/public/uploads/*.avi
-/public/uploads/*.mov
-/public/uploads/*.mkv
-/public/uploads/*.webm
-/public/uploads/*.flv
-/public/uploads/*.wmv
 
-# Large files (>50MB) - prevent accidental commits of large assets
+# Large files (>50MB) - prevent accidental commits
 /public/uploads/**/*
 !/public/uploads/.gitkeep
 

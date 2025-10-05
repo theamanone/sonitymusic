@@ -123,11 +123,16 @@ async function handleSegmentRequest(fileName: string, audioId: string) {
     
     try {
       const segmentBuffer = await readFile(segmentPath);
-      
-      return new NextResponse(segmentBuffer, {
+
+      // Construct a Blob from a copied Uint8Array to avoid SharedArrayBuffer typing
+      const segmentCopy = new Uint8Array(segmentBuffer);
+      const contentType = fileName.endsWith('.ts') ? 'video/mp2t' : 'audio/aac';
+      const body = new Blob([segmentCopy], { type: contentType });
+
+      return new NextResponse(body, {
         status: 200,
         headers: {
-          'Content-Type': fileName.endsWith('.ts') ? 'video/mp2t' : 'audio/aac',
+          'Content-Type': contentType,
           'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
           'Accept-Ranges': 'bytes',
           'Access-Control-Allow-Origin': '*'

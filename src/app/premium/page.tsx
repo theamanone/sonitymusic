@@ -85,7 +85,7 @@ export default async function PremiumPage() {
           contentAccess: { regularVideos: true, premiumMovies: false, exclusiveSeries: false, originalContent: false },
           platformFeatures: { adsEnabled: true, maxVideoQuality: '720p', maxConcurrentStreams: 1, offlineDownloads: false, maxOfflineDownloads: 0 },
           features: ['Unlimited video uploads', 'HD streaming', 'Basic features'],
-          benefits: ['No credit card required'],
+          benefits: ['No registration required'],
           popular: false,
           ui: { colorTheme: '#6B7280', gradientFrom: '#6B7280', gradientTo: '#9CA3AF' }
         }
@@ -98,7 +98,7 @@ export default async function PremiumPage() {
       currentTier: 'free',
       status: 'inactive',
       region: 'US',
-      usage: { videosUploaded: 0, storageUsed: 0, videosWatched: 0, totalWatchTime: 0 },
+      usage: { songsListened: 0, storageUsed: 0, songsPlayed: 0, totalListenTime: 0 },
       plans: plans,
       queuedChange: null
     };
@@ -114,10 +114,10 @@ export default async function PremiumPage() {
           status: subscription.status,
           region: 'US',
           usage: {
-            videosUploaded: subscription.usage.videosUploaded,
-            storageUsed: subscription.usage.storageUsed,
-            videosWatched: subscription.usage.videosWatched || 0,
-            totalWatchTime: subscription.usage.totalWatchTime || 0
+            songsListened: subscription.usage.songsPlayed || 0,
+            storageUsed: subscription.usage.storageUsed || 0,
+            songsPlayed: subscription.usage.songsPlayed || 0,
+            totalListenTime: subscription.usage.totalListenTime || 0
           },
           plans: plans,
           queuedChange: subscription.queuedChange ? {
@@ -145,7 +145,7 @@ export default async function PremiumPage() {
       currentTier: 'free',
       status: 'error',
       region: 'US',
-      usage: { videosUploaded: 0, storageUsed: 0, videosWatched: 0, totalWatchTime: 0 },
+      usage: { songsListened: 0, storageUsed: 0, songsPlayed: 0, totalListenTime: 0 },
       plans: [
         {
           name: 'free',

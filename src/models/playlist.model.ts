@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { Schema, model, models, Document } from "mongoose";
 
 // models/playlist.model.ts - USER PLAYLISTS
 export interface IPlaylist extends Document {
@@ -7,8 +7,8 @@ export interface IPlaylist extends Document {
   description?: string;
   userId: string; // ✅ Only store user ID
   privacy: "public" | "unlisted" | "private";
-  videos: {
-    videoId: string;
+  tracks: {
+    trackId: string;
     addedAt: Date;
   }[];
   createdAt: Date;
@@ -37,9 +37,9 @@ const PlaylistSchema = new Schema<IPlaylist>(
       enum: ["public", "unlisted", "private"],
       default: "public",
     },
-    videos: [
+    tracks: [
       {
-        videoId: {
+        trackId: {
           type: String,
           required: true,
         },
@@ -56,3 +56,5 @@ const PlaylistSchema = new Schema<IPlaylist>(
 // ✅ Indexes for user playlists and public discovery
 PlaylistSchema.index({ userId: 1, createdAt: -1 });
 PlaylistSchema.index({ privacy: 1, createdAt: -1 });
+
+export const Playlist = models.Playlist || model<IPlaylist>("Playlist", PlaylistSchema);

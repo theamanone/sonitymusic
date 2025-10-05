@@ -1,4 +1,4 @@
-// utils/subscription.service.ts - Music Platform Subscription Service
+// utils/subscription.service.ts - Music Streaming Platform Subscription Service
 import { connectDB } from '@/lib/mongodb';
 import { SubscriptionModel, ISubscription } from '@/models/billing-subscription.model';
 import { Plan, IPlan } from '@/models/plan.model';
@@ -28,44 +28,36 @@ export interface UserSubscription {
     region: string;
   };
   limits: {
-    canWatchRegularVideos: boolean;
-    canWatchPremiumMovies: boolean;
-    canWatchExclusiveSeries: boolean;
-    canWatchOriginalContent: boolean;
+    canListenToRegularSongs: boolean;
+    canListenToPremiumSongs: boolean;
+    canListenToExclusiveReleases: boolean;
+    canListenToOfficialMusicVideos: boolean;
     hasEarlyAccess: boolean;
     adsEnabled: boolean;
-    maxVideoQuality: string;
-    maxConcurrentStreams: number;
-    offlineDownloads: boolean;
-    maxOfflineDownloads: number;
-    canUploadVideos: boolean;
-    maxVideoUploadsPerMonth: number;
-    maxUploadQuality: string;
-    customThumbnails: boolean;
-    liveStreaming: boolean;
-    monetization: boolean;
-    advancedAnalytics: boolean;
-    storageQuotaGB: number;
-    bandwidthQuotaGB: number;
-    prioritySupport: boolean;
-    conciergeService: boolean;
-    betaFeatures: boolean;
-    apiAccess: boolean;
-    videosPerMonth: number;
-    maxVideoLength: number;
-    maxStorageGB: number;
-    canAccessPremium: boolean;
-    canUploadHD: boolean;
-    canUpload4K: boolean;
-    canCreatePlaylist: boolean;
+    highQualityStreaming: boolean;
+    losslessStreaming: boolean;
+    maxPlaylists: number;
+    canFollowArtists: boolean;
     canComment: boolean;
-    canDownload: boolean;
+    canShare: boolean;
+    canLikeSongs: boolean;
+    offlineDownloads: boolean;
+    maxOfflineDevices: number;
+    listenWithFriends: boolean;
+    liveSessions: boolean;
+    prioritySupport: boolean;
+    earlyAccess: boolean;
+    personalizedRecommendations: boolean;
+    familyPlan: boolean;
+    maxFamilyMembers: number;
+    canAccessPremium: boolean;
+    canCreatePlaylist: boolean;
   };
   usage: {
-    videosUploaded: number;
+    songsUploaded: number;
     storageUsed: number;
-    videosWatched: number;
-    totalWatchTime: number;
+    songsPlayed: number;
+    totalListenTime: number;
     bandwidthUsed: number;
     streamsThisMonth: number;
   };
@@ -105,49 +97,39 @@ export class SubscriptionService {
       },
       limits: {
         // Content access
-        canWatchRegularVideos: true,
-        canWatchPremiumMovies: false,
-        canWatchExclusiveSeries: false,
-        canWatchOriginalContent: false,
+        canListenToRegularSongs: true,
+        canListenToPremiumSongs: false,
+        canListenToExclusiveReleases: false,
+        canListenToOfficialMusicVideos: false,
         hasEarlyAccess: false,
         // Platform features
         adsEnabled: true,
-        maxVideoQuality: '720p',
-        maxConcurrentStreams: 1,
-        offlineDownloads: false,
-        maxOfflineDownloads: 0,
-        // Creator features
-        canUploadVideos: false,
-        maxVideoUploadsPerMonth: 0,
-        maxUploadQuality: '720p',
-        customThumbnails: false,
-        liveStreaming: false,
-        monetization: false,
-        advancedAnalytics: false,
-        // Storage
-        storageQuotaGB: 1,
-        bandwidthQuotaGB: 10,
-        // Premium services
-        prioritySupport: false,
-        conciergeService: false,
-        betaFeatures: false,
-        apiAccess: false,
-        // Legacy compatibility
-        videosPerMonth: 0,
-        maxVideoLength: 600,
-        maxStorageGB: 1,
-        canAccessPremium: false,
-        canUploadHD: false,
-        canUpload4K: false,
-        canCreatePlaylist: true,
+        highQualityStreaming: false,
+        losslessStreaming: false,
+        maxPlaylists: 10,
+        canFollowArtists: true,
         canComment: true,
-        canDownload: false
+        canShare: true,
+        canLikeSongs: true,
+        // Premium features (disabled for free)
+        offlineDownloads: false,
+        maxOfflineDevices: 0,
+        listenWithFriends: false,
+        liveSessions: false,
+        prioritySupport: false,
+        earlyAccess: false,
+        personalizedRecommendations: false,
+        familyPlan: false,
+        maxFamilyMembers: 1,
+        // Legacy compatibility
+        canAccessPremium: false,
+        canCreatePlaylist: true
       },
       usage: {
-        videosUploaded: 0,
+        songsUploaded: 0,
         storageUsed: 0,
-        videosWatched: 0,
-        totalWatchTime: 0,
+        songsPlayed: 0,
+        totalListenTime: 0,
         bandwidthUsed: 0,
         streamsThisMonth: 0
       },
@@ -156,13 +138,13 @@ export class SubscriptionService {
       queuedChange: null,
       features: [
         'Unlimited music streaming',
-        'HD quality streaming (720p)',
+        'Standard quality streaming',
         'Create playlists',
         'Like and comment',
         'Smart recommendations'
       ],
       benefits: [
-        'No credit card required',
+        'No registration required',
         'Instant access',
         'Stream on all devices',
         'Community features'
@@ -214,7 +196,7 @@ export class SubscriptionService {
         plan: plan.name,
         displayName: plan.displayName,
         status: subscription.status,
-        tier: plan.tier,
+        tier: plan.name === 'premium' ? 'premium' : plan.name === 'pro' ? 'pro' : 'free',
         pricing: {
           monthly: regionalPricing.monthly || 0,
           yearly: regionalPricing.yearly || 0,
@@ -223,49 +205,39 @@ export class SubscriptionService {
         },
         limits: {
           // Content access
-          canWatchRegularVideos: true,
-          canWatchPremiumMovies: plan.contentAccess?.premiumMovies ?? false,
-          canWatchExclusiveSeries: plan.contentAccess?.exclusiveSeries ?? false,
-          canWatchOriginalContent: plan.contentAccess?.originalContent ?? false,
-          hasEarlyAccess: plan.contentAccess?.earlyAccess ?? false,
+          canListenToRegularSongs: true,
+          canListenToPremiumSongs: plan.contentAccess?.premiumSongs ?? false,
+          canListenToExclusiveReleases: plan.contentAccess?.exclusiveReleases ?? false,
+          canListenToOfficialMusicVideos: plan.contentAccess?.officialMusicVideos ?? false,
+          hasEarlyAccess: plan.platformFeatures?.earlyAccess ?? false,
           // Platform features
           adsEnabled: plan.platformFeatures?.adsEnabled ?? true,
-          maxVideoQuality: plan.platformFeatures?.maxVideoQuality || '720p',
-          maxConcurrentStreams: plan.platformFeatures?.maxConcurrentStreams || 1,
+          highQualityStreaming: plan.platformFeatures?.highQualityStreaming ?? false,
+          losslessStreaming: plan.platformFeatures?.losslessStreaming ?? false,
+          maxPlaylists: plan.platformFeatures?.maxPlaylists ?? 10,
+          canFollowArtists: plan.platformFeatures?.canFollowArtists ?? true,
+          canComment: plan.platformFeatures?.canComment ?? true,
+          canShare: plan.platformFeatures?.canShare ?? true,
+          canLikeSongs: plan.platformFeatures?.canLikeSongs ?? true,
+          // Premium features
           offlineDownloads: plan.platformFeatures?.offlineDownloads ?? false,
-          maxOfflineDownloads: plan.platformFeatures?.maxOfflineDownloads || 0,
-          // Creator features (disabled for music platform)
-          canUploadVideos: false,
-          maxVideoUploadsPerMonth: 0,
-          maxUploadQuality: '720p',
-          customThumbnails: false,
-          liveStreaming: false,
-          monetization: false,
-          advancedAnalytics: false,
-          // Storage
-          storageQuotaGB: plan.platformFeatures?.storageQuotaGB ?? 1,
-          bandwidthQuotaGB: plan.platformFeatures?.bandwidthQuotaGB ?? 10,
-          // Premium services
+          maxOfflineDevices: plan.platformFeatures?.maxOfflineDevices ?? 0,
+          listenWithFriends: plan.platformFeatures?.listenWithFriends ?? false,
+          liveSessions: plan.platformFeatures?.liveSessions ?? false,
           prioritySupport: plan.platformFeatures?.prioritySupport ?? false,
-          conciergeService: plan.platformFeatures?.conciergeService ?? false,
-          betaFeatures: plan.platformFeatures?.betaFeatures ?? false,
-          apiAccess: plan.platformFeatures?.apiAccess ?? false,
+          earlyAccess: plan.platformFeatures?.earlyAccess ?? false,
+          personalizedRecommendations: plan.platformFeatures?.personalizedRecommendations ?? false,
+          familyPlan: plan.platformFeatures?.familyPlan ?? false,
+          maxFamilyMembers: plan.platformFeatures?.maxFamilyMembers ?? 1,
           // Legacy compatibility
-          videosPerMonth: 0,
-          maxVideoLength: 600,
-          maxStorageGB: 1,
-          canAccessPremium: plan.contentAccess?.premiumMovies ?? false,
-          canUploadHD: false,
-          canUpload4K: false,
-          canCreatePlaylist: true,
-          canComment: true,
-          canDownload: plan.platformFeatures?.offlineDownloads ?? false
+          canAccessPremium: plan.contentAccess?.premiumSongs ?? false,
+          canCreatePlaylist: plan.platformFeatures?.canCreatePlaylists ?? true
         },
         usage: {
-          videosUploaded: 0,
+          songsUploaded: 0,
           storageUsed: 0,
-          videosWatched: 0,
-          totalWatchTime: 0,
+          songsPlayed: 0,
+          totalListenTime: 0,
           bandwidthUsed: 0,
           streamsThisMonth: 0
         },

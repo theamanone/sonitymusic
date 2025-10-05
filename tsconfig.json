@@ -39,6 +39,7 @@
     "public/data/**/*",
     ".next",
     "out",
-    "build"
+    "build",
+    "private/**/*"
   ]
 }

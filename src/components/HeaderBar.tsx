@@ -52,7 +52,7 @@ export default function HeaderBar({ subscription, subLoading, selectedModel, onS
                 {/* Mobile: App Name with Plan Badge */}
                 <div className="md:hidden flex flex-col items-start">
                     <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-gray-900">Cinevo AI</span>
+                        <span className="text-lg font-bold text-gray-900">Sonity</span>
                         {getPlanBadge()}
                     </div>
                 </div>
@@ -201,7 +201,7 @@ export default function HeaderBar({ subscription, subLoading, selectedModel, onS
                                         </svg>
                                     </div>
                                     <div className="text-left min-w-0">
-                                        <div className="font-semibold text-[#262626] text-sm truncate">Cinevo Creative</div>
+                                        <div className="font-semibold text-[#262626] text-sm truncate">Sonity Creative</div>
                                         <div className="text-[10px] text-[#85754E] truncate">AI Style Generation & Mood Boards</div>
                                     </div>
                                 </div>
@@ -217,7 +217,7 @@ export default function HeaderBar({ subscription, subLoading, selectedModel, onS
                                         </svg>
                                     </div>
                                     <div className="text-left min-w-0">
-                                        <div className="font-semibold text-[#262626] text-sm truncate">Cinevo Vision</div>
+                                        <div className="font-semibold text-[#262626] text-sm truncate">Sonity Vision</div>
                                         <div className="text-[10px] text-[#85754E] truncate">Advanced Outfit Analysis & Recognition</div>
                                     </div>
                                 </div>
@@ -232,7 +232,7 @@ export default function HeaderBar({ subscription, subLoading, selectedModel, onS
                                         </svg>
                                     </div>
                                     <div className="text-left min-w-0">
-                                        <div className="font-semibold text-[#262626] text-sm truncate">Cinevo Flash</div>
+                                        <div className="font-semibold text-[#262626] text-sm truncate">Sonity Flash</div>
                                         <div className="text-[10px] text-[#85754E] truncate">Ultra-Fast Fashion Responses</div>
                                     </div>
                                 </div>

@@ -1,7 +1,5 @@
-"use client";
-
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Video, Upload, Mic, Camera, FileText, Zap, ChevronDown } from 'lucide-react';
+import { Plus, ListMusic, Radio, Mic, Heart, ChevronDown } from 'lucide-react';
 
 interface CreateDropdownProps {
   className?: string;
@@ -24,39 +22,32 @@ export default function CreateDropdown({ className = "" }: CreateDropdownProps) 
 
   const createOptions = [
     {
-      icon: Video,
-      title: 'Upload Video',
-      description: 'Share your video content',
-      href: '/upload',
-      color: 'text-red-400'
-    },
-    {
-      icon: Camera,
-      title: 'Go Live',
-      description: 'Stream live to your audience',
-      href: '/live/create',
+      icon: ListMusic,
+      title: 'Create Playlist',
+      description: 'Make a new music playlist',
+      href: '/playlists/create',
       color: 'text-green-400'
     },
     {
-      icon: Mic,
-      title: 'Audio Only',
-      description: 'Upload podcast or audio',
-      href: '/upload?type=audio',
+      icon: Radio,
+      title: 'Start Station',
+      description: 'Create a radio station',
+      href: '/radio/create',
       color: 'text-blue-400'
     },
     {
-      icon: FileText,
-      title: 'Create Course',
-      description: 'Build educational content',
-      href: '/courses/create',
-      color: 'text-purple-400'
+      icon: Mic,
+      title: 'Go Live',
+      description: 'Stream live music session',
+      href: '/live/create',
+      color: 'text-red-400'
     },
     {
-      icon: Zap,
-      title: 'Quick Upload',
-      description: 'Fast upload with defaults',
-      href: '/upload?quick=true',
-      color: 'text-yellow-400'
+      icon: Heart,
+      title: 'Liked Songs',
+      description: 'View your favorite tracks',
+      href: '/library/liked',
+      color: 'text-pink-400'
     }
   ];
 

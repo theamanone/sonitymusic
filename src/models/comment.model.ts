@@ -2,7 +2,7 @@ import { Schema, model, models, Document } from "mongoose";
 
 export interface IComment extends Document {
   _id: string;
-  videoId: string;
+  trackId: string;
   userId: string; // ✅ Only store user ID
   content: string;
   likes: number;
@@ -15,7 +15,7 @@ export interface IComment extends Document {
 
 const CommentSchema = new Schema<IComment>(
   {
-    videoId: {
+    trackId: {
       type: String,
       required: true,
     },
@@ -50,7 +50,7 @@ const CommentSchema = new Schema<IComment>(
 );
 
 // ✅ Indexes at end only
-CommentSchema.index({ videoId: 1, createdAt: -1 });
+CommentSchema.index({ trackId: 1, createdAt: -1 });
 CommentSchema.index({ userId: 1, createdAt: -1 });
 CommentSchema.index({ parentId: 1 });
 

@@ -1,9 +1,9 @@
-// app/page.tsx - Sonity Music Streaming Landing Page
 import { SITE_CONFIG } from "@/config/site.config";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth.config";
 import { SubscriptionService } from "@/utils/subscription.service";
+import { type SubscriptionData } from "@/contexts/SubscriptionContext";
 import ClientHome from "./ClientHome";
 
 // Mock track data for demonstration (same as in API route)
@@ -479,17 +479,6 @@ const mockTracks = [
 export const revalidate = 300; // Revalidate every 5 minutes
 export const dynamic = 'force-static';
 
-export interface SubscriptionData {
-  plan: string;
-  status: string;
-  videosUploaded: number;
-  storageUsed: number;
-  canWatchAdFree: boolean;
-  canUploadHD: boolean;
-  canUpload4K: boolean;
-  canAccessPremium: boolean;
-}
-
 export const metadata: Metadata = {
   title: `Sonity - Stream Music Online | Enhanced Music Platform`,
   description: `Discover and stream millions of songs from artists around the world. Your music, your way with Sonity.`,
@@ -524,11 +513,11 @@ export default async function Home() {
   let initialSubscription: SubscriptionData = {
     plan: "guest",
     status: "none",
-    videosUploaded: 0,
+    songsListened: 0,
     storageUsed: 0,
     canWatchAdFree: false,
-    canUploadHD: false,
-    canUpload4K: false,
+    canListenWithFriends: false,
+    canJoinLiveSessions: false,
     canAccessPremium: false,
   };
 
@@ -538,16 +527,16 @@ export default async function Home() {
 
     if (subscription) {
       const canWatchAdFree = !(subscription.limits?.adsEnabled ?? true);
-      const canAccessPremium = subscription.limits?.canWatchPremiumMovies ?? false;
+      const canAccessPremium = subscription.limits?.canListenToPremiumSongs ?? false;
 
       initialSubscription = {
         plan: subscription.plan,
         status: subscription.status,
-        videosUploaded: subscription.usage?.videosUploaded || 0,
+        songsListened: subscription.usage?.songsPlayed || 0,
         storageUsed: subscription.usage?.storageUsed || 0,
         canWatchAdFree,
-        canUploadHD: subscription.limits.canUploadHD,
-        canUpload4K: subscription.limits.canUpload4K,
+        canListenWithFriends: subscription.limits?.listenWithFriends ?? false,
+        canJoinLiveSessions: subscription.limits?.liveSessions ?? false,
         canAccessPremium,
       };
     } else {
@@ -555,11 +544,11 @@ export default async function Home() {
       initialSubscription = {
         plan: "free",
         status: "active",
-        videosUploaded: 0,
+        songsListened: 0,
         storageUsed: 0,
         canWatchAdFree: false,
-        canUploadHD: false,
-        canUpload4K: false,
+        canListenWithFriends: false,
+        canJoinLiveSessions: false,
         canAccessPremium: false,
       };
     }

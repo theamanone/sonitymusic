@@ -48,7 +48,7 @@ export default function SettingsClient() {
   });
 
   const handleSave = () => {
-    console.log("Cinevo settings saved:", settings, currentTheme);
+    console.log("Sonity settings saved:", settings, currentTheme);
     // Save to your backend API
   };
 
@@ -60,7 +60,7 @@ export default function SettingsClient() {
   ];
 
   const variantOptions = [
-    { value: 'default', label: 'Default', desc: 'Standard Cinevo experience' },
+    { value: 'default', label: 'Default', desc: 'Standard Sonity experience' },
     { value: 'high-contrast', label: 'High Contrast', desc: 'Enhanced accessibility' },
     { value: 'compact', label: 'Compact', desc: 'Dense layout for power users' },
     { value: 'comfortable', label: 'Comfortable', desc: 'Spacious layout for relaxed viewing' },
@@ -83,7 +83,7 @@ export default function SettingsClient() {
                 Platform Settings
               </h1>
               <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                Customize your Cinevo experience
+                Customize your Sonity experience
               </p>
             </div>
           </div>

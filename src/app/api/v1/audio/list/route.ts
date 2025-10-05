@@ -2,11 +2,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { privateStorage } from '@/lib/storage/private-storage';
 import { withRateLimit, RATE_LIMIT_RULES } from '@/lib/rate-limiting/rate-limiter';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth.config';
 
 async function listHandler(request: NextRequest) {
   try {
+    // Get NextAuth session
+    const session = await getServerSession(authOptions);
+    const currentUserId = session?.user?.id;
+
+    // Check authentication
+    if (!currentUserId) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const userId = searchParams.get('userId') || currentUserId;
     const page = parseInt(searchParams.get('page') || '1');
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100); // Max 100 items
     const sortBy = searchParams.get('sortBy') || 'createdAt'; // createdAt, accessCount, title
@@ -14,7 +28,7 @@ async function listHandler(request: NextRequest) {
     const search = searchParams.get('search');
 
     // Get all stored files
-    let files = await privateStorage.listStoredFiles(userId);
+    let files = await privateStorage.listStoredFiles(userId ?? undefined);
 
     // Filter by search query
     if (search) {
@@ -60,7 +74,7 @@ async function listHandler(request: NextRequest) {
 
     // Format response data
     const formattedFiles = paginatedFiles.map(file => {
-      const accessToken = generateAccessToken(file.id, userId);
+      const accessToken = generateAccessToken(file.id, userId ?? undefined);
       
       return {
         id: file.id,

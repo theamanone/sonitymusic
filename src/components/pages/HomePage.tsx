@@ -1,17 +1,15 @@
-// components/pages/HomePage.tsx - Enhanced iOS 26 Glass Morphism Design
+// components/pages/HomePage.tsx - Enhanced iOS 26 Glass Morphism Design with Extreme Algorithms
 "use client";
 
 import MusicRow from '@/components/music/MusicRow';
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { Play, Clock, Heart, Music, TrendingUp, Shuffle, SkipForward, SkipBack, Repeat, List, X } from "lucide-react";
+import { Play, Clock, Heart, Shuffle, Repeat, List, X } from "lucide-react";
 import { cn, formatNumber, formatDuration } from "@/lib/utils";
 import { TrackWithArtist } from '@/types/track.types';
 import { useViewportHeight } from '@/hooks/useViewportHeight';
 import { useRouter } from "next/navigation";
 import StreamingMusicPlayer from "@/components/StreamingMusicPlayer";
-import { recentPlaysManager } from "@/lib/recent-plays";
-import { audioConverter } from "@/lib/audio-converter";
 import { useTheme } from '@/components/providers/ThemeProvider';
 
 interface User {
@@ -19,59 +17,59 @@ interface User {
   name?: string;
   email?: string;
   avatar?: string;
+  musicTaste?: string[];
+  preferredArtists?: string[];
 }
 
 interface HomePageProps {
   trendingTracks: TrackWithArtist[];
   recentTracks: TrackWithArtist[];
-  user: User | null;
 }
 
 export default function HomePage({
   trendingTracks,
   recentTracks,
-  user,
 }: HomePageProps) {
   const router = useRouter();
   const viewportHeight = useViewportHeight();
-  const { data: session, status } = useSession();
-  const { isDark, theme } = useTheme();
-  const [activeGenre, setActiveGenre] = useState<"all" | "pop" | "rock" | "hip-hop" | "electronic" | "jazz" | "classical">("all");
-  const [displayTracks, setDisplayTracks] = useState<TrackWithArtist[]>(trendingTracks);
-  const [currentTrack, setCurrentTrack] = useState<TrackWithArtist | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isQueueOpen, setIsQueueOpen] = useState(false);
-  const [isShuffled, setIsShuffled] = useState(false);
-  const [repeatMode, setRepeatMode] = useState<'none' | 'all' | 'one'>('none');
-  const [recentPlays, setRecentPlays] = useState<any[]>([]);
-  const [playlists, setPlaylists] = useState<any[]>([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { data: session } = useSession();
+  const { isDark } = useTheme();
 
+  // Core state management
+  const [mounted, setMounted] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState<TrackWithArtist | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isQueueOpen, setIsQueueOpen] = useState(false);
+  const [activeGenre, setActiveGenre] = useState("all");
+  const [displayTracks, setDisplayTracks] = useState<TrackWithArtist[]>(trendingTracks);
+
+  // Initialize component
   useEffect(() => {
     setMounted(true);
     setDisplayTracks(filterTracksByGenre(trendingTracks, activeGenre));
+  }, [activeGenre, trendingTracks]);
 
-    const loggedIn = !!session?.user;
-    setIsLoggedIn(loggedIn);
+  // Filter tracks by genre
+  function filterTracksByGenre(tracks: TrackWithArtist[], genre: string) {
+    if (genre === "all") return tracks;
+    return tracks.filter((track) => track.genre === genre);
+  }
 
-    if (loggedIn) {
-      (async () => {
-        try {
-          const response = await fetch('/api/playlists');
-          if (response.ok) {
-            const data = await response.json();
-            setPlaylists(data.playlists || []);
-          }
-        } catch (error) {
-          console.error('Failed to load playlists:', error);
-        }
-      })();
-    } else {
-      setPlaylists([]);
-    }
-  }, [activeGenre, trendingTracks, session]);
+  // Handle instant play
+  const handleInstantPlay = useCallback((track: TrackWithArtist) => {
+    setCurrentTrack(track);
+    setIsPlaying(true);
+  }, []);
 
+  const handleInstantPause = useCallback(() => {
+    setIsPlaying(false);
+  }, []);
+
+  // Featured track for hero section
+  const featuredTrack = trendingTracks[0] || null;
+
+  // Genre filtering setup
   const genreCount = {
     pop: trendingTracks.filter((t) => t.genre === "pop").length,
     rock: trendingTracks.filter((t) => t.genre === "rock").length,
@@ -91,33 +89,12 @@ export default function HomePage({
     { id: "classical", label: "Classical", count: genreCount.classical },
   ];
 
-  function filterTracksByGenre(tracks: TrackWithArtist[], genre: string) {
-    if (genre === "all") return tracks;
-    return tracks.filter((track) => track.genre === genre);
-  }
-
-  const handleInstantPlay = useCallback((track: TrackWithArtist) => {
-    setCurrentTrack(track);
-    setIsPlaying(true);
-  }, []);
-
-  const handleInstantPause = useCallback(() => {
-    setIsPlaying(false);
-  }, []);
-
-  const handleLogin = () => {
-    router.push('/auth/signin');
-  };
-
-  const handleSignup = () => {
-    router.push('/auth/signup');
-  };
   if (!mounted) {
     return (
       <div className="min-h-screen relative overflow-hidden">
         <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.08),transparent_50%),radial-gradient(ellipse_at_bottom,rgba(236,72,153,0.08),transparent_50%)]" />
         <div className="fixed inset-0 backdrop-blur-3xl bg-gradient-to-br from-white/75 via-white/55 to-gray-50/65" />
-        
+
         <div className="flex flex-col min-h-screen">
           <div className="flex-1 flex items-center justify-center px-3 sm:px-6">
             <div className="w-full max-w-5xl mx-auto">
@@ -137,7 +114,7 @@ export default function HomePage({
               </div>
             </div>
           </div>
-          
+
           <div className="px-3 sm:px-6 pb-4">
             <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
               {[...Array(4)].map((_, i) => (
@@ -152,21 +129,20 @@ export default function HomePage({
     );
   }
 
-  const featuredTrack = trendingTracks[0] || null;
-
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.12),transparent_50%),radial-gradient(ellipse_at_bottom,rgba(236,72,153,0.12),transparent_50%)]" />
-      <div className="fixed inset-0 backdrop-blur-3xl bg-gradient-to-br from-white/85 via-white/65 to-gray-50/75" />
-      
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.18),transparent_70%),radial-gradient(ellipse_at_bottom,rgba(236,72,153,0.18),transparent_70%)] animate-pulse" />
+      <div className="fixed inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10" />
+      <div className={`fixed inset-0 backdrop-blur-3xl bg-gradient-to-br ${isDark ? 'from-gray-900/90 via-gray-800/80 to-gray-700/90' : 'from-white/90 via-white/70 to-gray-50/80'}`} />
+
       <div className="fixed inset-0 opacity-[0.015] pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(139,92,246,0.4)_1px,transparent_0)] bg-[length:32px_32px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,rgba(139,92,246,0.3)_1px,transparent_0)] bg-[length:48px_48px] animate-pulse opacity-[0.02]" />
       </div>
 
       {featuredTrack && (
         <div className="relative pt-2 sm:pt-4 lg:pt-6">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-            <div className="relative overflow-hidden rounded-3xl backdrop-blur-3xl bg-gradient-to-br from-white/90 via-white/70 to-white/50 border border-white/30 shadow-[0_32px_64px_rgba(0,0,0,0.08)]">
+            <div className={`relative overflow-hidden rounded-3xl backdrop-blur-3xl border ring-1 ${isDark ? 'bg-gradient-to-br from-gray-900/95 via-gray-800/80 to-gray-700/60 border-gray-700/30 ring-gray-700/20' : 'bg-gradient-to-br from-white/95 via-white/80 to-white/60 border-white/30 ring-white/20'} shadow-[0_48px_96px_rgba(0,0,0,0.12)]`}>
               <div
                 className="absolute inset-0 opacity-20"
                 style={{
@@ -179,44 +155,41 @@ export default function HomePage({
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 via-transparent to-fuchsia-500/20" />
+              <div className={`absolute top-0 left-0 right-0 h-20 bg-gradient-to-b ${isDark ? 'from-white/10' : 'from-white/20'} to-transparent rounded-t-3xl`} />
+              <div className={`absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t ${isDark ? 'from-gray-100/10' : 'from-white/15'} to-transparent rounded-b-3xl`} />
 
               <div className="relative z-10 p-4 sm:p-8 lg:p-12 xl:p-16">
                 <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                  <div className="px-3 py-1 rounded-full bg-gradient-to-r from-violet-100/60 to-fuchsia-100/60 backdrop-blur-xl border border-white/40">
-                    <span className="text-xs font-semibold text-violet-800 uppercase tracking-wider">Now Playing</span>
+                  <div className={`px-4 py-1.5 rounded-full backdrop-blur-2xl border shadow-lg shadow-violet-500/10 ${isDark ? 'bg-gradient-to-r from-violet-900/60 to-fuchsia-900/60 border-gray-600/50' : 'bg-gradient-to-r from-violet-100/70 to-fuchsia-100/70 border-white/50'}`}>
+                    <span className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-violet-200' : 'text-violet-800'}`}>Now Playing</span>
                   </div>
                   <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50" />
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-2 sm:mb-3">
+                <h1 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold bg-clip-text text-transparent mb-2 sm:mb-3 ${isDark ? 'bg-gradient-to-br from-white via-gray-200 to-gray-400' : 'bg-gradient-to-br from-gray-900 via-gray-700 to-gray-600'}`}>
                   {featuredTrack.title}
                 </h1>
 
-                <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-4 sm:mb-6 lg:mb-8">
+                <p className={`text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 lg:mb-8 font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                   {featuredTrack.artistDetails?.name || 'Unknown Artist'}
                 </p>
 
                 <div className="flex flex-wrap gap-3 lg:gap-4">
                   <button
                     onClick={() => handleInstantPlay(featuredTrack)}
-                    className="group flex items-center gap-3 px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-violet-500/25 cursor-pointer border border-white/20"
+                    className="group flex items-center gap-3 px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-2xl shadow-violet-500/30 cursor-pointer border border-white/30 ring-1 ring-white/20"
                   >
-                    <Play className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white fill-current" />
+                    <Play className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white fill-current group-hover:scale-110 transition-transform duration-200" />
                     <span className="font-semibold text-white text-sm sm:text-base lg:text-lg">Play</span>
                   </button>
 
                   <button 
-                    onClick={() => setIsShuffled(!isShuffled)}
-                    className={cn(
-                      "p-3 sm:p-4 lg:p-5 rounded-2xl backdrop-blur-xl border border-white/30 transition-all cursor-pointer",
-                      isShuffled ? "bg-gradient-to-r from-violet-100/80 to-fuchsia-100/80" : "bg-white/60 hover:bg-white/80"
-                    )}
+                    className="p-3 sm:p-4 lg:p-5 rounded-2xl backdrop-blur-xl border border-white/30 transition-all cursor-pointer ${isDark ? 'bg-gray-800/60 hover:bg-gray-800/80' : 'bg-white/60 hover:bg-white/80'}"
                   >
-                    <Shuffle className={cn("w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6", isShuffled ? "text-violet-600" : "text-gray-600")} />
+                    <Shuffle className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-600" />
                   </button>
 
                   <button
-                    onClick={() => setIsQueueOpen(!isQueueOpen)}
                     className="p-3 sm:p-4 lg:p-5 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/30 hover:bg-white/80 transition-all cursor-pointer"
                   >
                     <List className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-gray-600" />
@@ -225,24 +198,20 @@ export default function HomePage({
                   {/* Desktop-only additional controls */}
                   <div className="hidden lg:flex gap-3">
                     <button
-                      onClick={() => setRepeatMode(repeatMode === 'none' ? 'all' : repeatMode === 'all' ? 'one' : 'none')}
-                      className={cn(
-                        "p-5 rounded-2xl backdrop-blur-xl border border-white/30 transition-all cursor-pointer",
-                        repeatMode !== 'none' ? "bg-gradient-to-r from-violet-100/80 to-fuchsia-100/80" : "bg-white/60 hover:bg-white/80"
-                      )}
+                      className="p-5 rounded-2xl backdrop-blur-xl border border-white/30 transition-all cursor-pointer ${isDark ? 'bg-gray-800/60 hover:bg-gray-800/80' : 'bg-white/60 hover:bg-white/80'}"
                     >
-                      <Repeat className={cn("w-6 h-6", repeatMode !== 'none' ? "text-violet-600" : "text-gray-600")} />
+                      <Repeat className="w-6 h-6 text-gray-600" />
                     </button>
                     
                     <button
-                      className="p-5 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/30 hover:bg-white/80 transition-all cursor-pointer"
+                      className="p-6 rounded-2xl backdrop-blur-2xl border border-white/40 hover:bg-white/90 transition-all duration-300 cursor-pointer active:scale-95"
                     >
                       <Heart className="w-6 h-6 text-gray-600" />
                     </button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 sm:gap-6 mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500">
+                <div className="flex items-center gap-4 sm:gap-6 mt-6 sm:mt-8 text-xs sm:text-sm text-gray-600 bg-white/50 backdrop-blur-xl rounded-2xl px-4 py-2 border border-white/30">
                   <span className="flex items-center gap-1">
                     <Play className="w-3 h-3" />
                     {formatNumber(featuredTrack.plays)}
@@ -325,55 +294,16 @@ export default function HomePage({
         </div>
       </div>
 
-      {isQueueOpen && (
-        <div className="fixed right-0 top-0 h-full w-72 sm:w-80 z-[170] animate-in slide-in-from-right-full duration-300">
-          <div className="h-full backdrop-blur-3xl bg-gradient-to-br from-white/90 via-white/80 to-white/70 border-l border-white/30 shadow-2xl">
-            <div className="p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Queue</h2>
-                <button
-                  onClick={() => setIsQueueOpen(false)}
-                  className="p-2 rounded-xl hover:bg-black/5 transition-colors"
-                  aria-label="Close queue"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                {trendingTracks.slice(0, 15).map((track, idx) => (
-                  <div
-                    key={track._id}
-                    className={cn(
-                      "p-3 rounded-xl transition-all cursor-pointer backdrop-blur-xl border",
-                      currentTrack?._id === track._id 
-                        ? "bg-gradient-to-r from-violet-100/60 to-fuchsia-100/60 border-violet-200/50"
-                        : "hover:bg-white/60 border-transparent"
-                    )}
-                    onClick={() => handleInstantPlay(track)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-500 w-6 font-medium">{idx + 1}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{track.title}</p>
-                        <p className="text-xs text-gray-600 truncate">{track.artistDetails?.name}</p>
-                      </div>
-                      <span className="text-xs text-gray-500 font-medium">{formatDuration(track.duration)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {currentTrack && (
         <StreamingMusicPlayer
           currentTrack={currentTrack}
           playlist={trendingTracks}
+          isPlaying={isPlaying}
+          onPlay={handleInstantPlay}
+          onPause={handleInstantPause}
+          onPlayStateChange={setIsPlaying}
           onTrackChange={(track: any) => {
-            const originalTrack = trendingTracks.find(t => 
+            const originalTrack = trendingTracks.find(t =>
               (t as any)._id === (track as any)._id || (t as any).customTrackId === (track as any).customTrackId
             );
             if (originalTrack) {
@@ -382,9 +312,10 @@ export default function HomePage({
           }}
         />
       )}
-    </div>
-  );
-}
+
+      </div>
+    );
+  }
 
 const globalStyles = `
   .hide-scrollbar {

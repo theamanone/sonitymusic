@@ -1,11 +1,11 @@
-// Asset paths for Cinevo Video Platform
+// Asset paths for Sonity Music Platform
 
 const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
   return process.env.NODE_ENV === 'production' 
-    ? 'https://cinevo.veliessa.com'
+    ? 'https://sonity.veliessa.com'
     : 'http://localhost:3001';
 };
 

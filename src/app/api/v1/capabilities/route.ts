@@ -6,32 +6,32 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
-    // For video platform, return video-specific capabilities
+    // For music platform, return music-specific capabilities
     if (!session?.user?.id) {
       return NextResponse.json({
-        canUploadVideo: false,
+        canUploadSong: false,
         canAccessPremium: false,
         canCreatePlaylist: false,
         canComment: false,
-        maxVideoLength: 0,
+        maxSongLength: 0,
       });
     }
 
-    // For authenticated users, enable basic video features
+    // For authenticated users, enable basic music features
     return NextResponse.json({
-      canUploadVideo: true,
+      canUploadSong: true,
       canAccessPremium: false, // Based on subscription in future
       canCreatePlaylist: true,
       canComment: true,
-      maxVideoLength: 300, // 5 minutes for free users
+      maxSongLength: 300, // 5 minutes for free users
     });
   } catch (e) {
     return NextResponse.json({
-      canUploadVideo: false,
+      canUploadSong: false,
       canAccessPremium: false,
       canCreatePlaylist: false,
       canComment: false,
-      maxVideoLength: 0,
+      maxSongLength: 0,
     });
   }
 }

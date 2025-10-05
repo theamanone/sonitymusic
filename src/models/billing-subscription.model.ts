@@ -19,83 +19,64 @@ export interface ISubscription {
   trialEnd?: Date;
   gracePeriodEnd?: Date;
   
-  // Payment Integration
   razorpaySubscriptionId?: string;
   razorpayCustomerId?: string;
   stripeSubscriptionId?: string;
   stripeCustomerId?: string;
   
-  // Enhanced Usage Tracking
+  // Enhanced Usage Tracking (Music Consumption Only)
   usage: {
     // Content Consumption
-    videosWatched: number;
-    moviesWatched: number;
-    seriesWatched: number;
-    totalWatchTimeMinutes: number;
-    
-    // Content Creation
-    videosUploaded: number;
-    videosUploadedThisMonth: number;
-    storageUsedGB: number;
-    bandwidthUsedGB: number;
-    
+    songsPlayed: number;
+    albumsPlayed: number;
+    playlistsFollowed: number;
+    totalListenTimeMinutes: number;
+
     // Social Features
     commentsPosted: number;
     playlistsCreated: number;
     likesGiven: number;
     sharesCount: number;
-    
+
     // Downloads & Offline
     downloadsUsed: number;
     offlineStorageUsedGB: number;
-    
+
     // Streaming
     concurrentStreamsUsed: number;
-    qualityUsage: {
-      '480p': number;
-      '720p': number;
-      '1080p': number;
-      '4K': number;
-      '8K': number;
-    };
-    
-    // Creator Analytics
-    totalViews: number;
-    totalRevenue: number;
-    liveStreamsHosted: number;
   };
   
-  // Feature Access Cache (from plan)
+  // Feature Access Cache (from plan) - MUSIC ONLY
   features: {
     // Content Access
-    canWatchRegularVideos: boolean;
-    canWatchPremiumMovies: boolean;
-    canWatchExclusiveSeries: boolean;
-    canWatchOriginalContent: boolean;
+    canListenToRegularSongs: boolean;
+    canListenToPremiumSongs: boolean;
+    canListenToExclusiveReleases: boolean;
+    canListenToOfficialMusicVideos: boolean;
     hasEarlyAccess: boolean;
-    
+
     // Platform Features
     adsEnabled: boolean;
-    maxVideoQuality: '480p' | '720p' | '1080p' | '4K' | '8K';
-    maxConcurrentStreams: number;
+    highQualityStreaming: boolean;
+    losslessStreaming: boolean;
+    maxPlaylists: number;
+    canFollowArtists: boolean;
+    canComment: boolean;
+    canShare: boolean;
+    canLikeSongs: boolean;
+
+    // Premium Features
     offlineDownloads: boolean;
-    maxOfflineDownloads: number;
-    
-    // Creator Features
-    canUploadVideos: boolean;
-    maxVideoUploadsPerMonth: number;
-    maxUploadQuality: '720p' | '1080p' | '4K' | '8K';
-    customThumbnails: boolean;
-    videoScheduling: boolean;
-    liveStreaming: boolean;
-    monetization: boolean;
-    advancedAnalytics: boolean;
-    
-    // Premium Services
+    maxOfflineDevices: number;
+    listenWithFriends: boolean;
+    liveSessions: boolean;
     prioritySupport: boolean;
-    conciergeService: boolean;
-    betaFeatures: boolean;
-    apiAccess: boolean;
+    earlyAccess: boolean;
+    personalizedRecommendations: boolean;
+
+    // Family Plans
+    familyPlan: boolean;
+    maxFamilyMembers: number;
   };
   
   // Plan Change Management
@@ -179,85 +160,59 @@ const SubscriptionSchema = new Schema<ISubscription>({
   stripeSubscriptionId: String,
   stripeCustomerId: String,
   
-  // Enhanced Usage Tracking
+  // Enhanced Usage Tracking (Music Consumption Only)
   usage: {
     // Content Consumption
-    videosWatched: { type: Number, default: 0 },
-    moviesWatched: { type: Number, default: 0 },
-    seriesWatched: { type: Number, default: 0 },
-    totalWatchTimeMinutes: { type: Number, default: 0 },
-    
-    // Content Creation
-    videosUploaded: { type: Number, default: 0 },
-    videosUploadedThisMonth: { type: Number, default: 0 },
-    storageUsedGB: { type: Number, default: 0 },
-    bandwidthUsedGB: { type: Number, default: 0 },
-    
+    songsPlayed: { type: Number, default: 0 },
+    albumsPlayed: { type: Number, default: 0 },
+    playlistsFollowed: { type: Number, default: 0 },
+    totalListenTimeMinutes: { type: Number, default: 0 },
+
     // Social Features
     commentsPosted: { type: Number, default: 0 },
     playlistsCreated: { type: Number, default: 0 },
     likesGiven: { type: Number, default: 0 },
     sharesCount: { type: Number, default: 0 },
-    
+
     // Downloads & Offline
     downloadsUsed: { type: Number, default: 0 },
     offlineStorageUsedGB: { type: Number, default: 0 },
-    
+
     // Streaming
-    concurrentStreamsUsed: { type: Number, default: 0 },
-    qualityUsage: {
-      '480p': { type: Number, default: 0 },
-      '720p': { type: Number, default: 0 },
-      '1080p': { type: Number, default: 0 },
-      '4K': { type: Number, default: 0 },
-      '8K': { type: Number, default: 0 }
-    },
-    
-    // Creator Analytics
-    totalViews: { type: Number, default: 0 },
-    totalRevenue: { type: Number, default: 0 },
-    liveStreamsHosted: { type: Number, default: 0 }
+    concurrentStreamsUsed: { type: Number, default: 0 }
   },
   
-  // Feature Access Cache
+  // Feature Access Cache - MUSIC ONLY
   features: {
     // Content Access
-    canWatchRegularVideos: { type: Boolean, default: true },
-    canWatchPremiumMovies: { type: Boolean, default: false },
-    canWatchExclusiveSeries: { type: Boolean, default: false },
-    canWatchOriginalContent: { type: Boolean, default: false },
+    canListenToRegularSongs: { type: Boolean, default: true },
+    canListenToPremiumSongs: { type: Boolean, default: false },
+    canListenToExclusiveReleases: { type: Boolean, default: false },
+    canListenToOfficialMusicVideos: { type: Boolean, default: false },
     hasEarlyAccess: { type: Boolean, default: false },
-    
+
     // Platform Features
     adsEnabled: { type: Boolean, default: true },
-    maxVideoQuality: { 
-      type: String, 
-      enum: ['480p', '720p', '1080p', '4K', '8K'], 
-      default: '720p' 
-    },
-    maxConcurrentStreams: { type: Number, default: 1 },
+    highQualityStreaming: { type: Boolean, default: false },
+    losslessStreaming: { type: Boolean, default: false },
+    maxPlaylists: { type: Number, default: 10 },
+    canFollowArtists: { type: Boolean, default: true },
+    canComment: { type: Boolean, default: true },
+    canShare: { type: Boolean, default: true },
+    canLikeSongs: { type: Boolean, default: true },
+
+    // Premium Features
     offlineDownloads: { type: Boolean, default: false },
-    maxOfflineDownloads: { type: Number, default: 0 },
-    
-    // Creator Features
-    canUploadVideos: { type: Boolean, default: true },
-    maxVideoUploadsPerMonth: { type: Number, default: -1 },
-    maxUploadQuality: { 
-      type: String, 
-      enum: ['720p', '1080p', '4K', '8K'], 
-      default: '1080p' 
-    },
-    customThumbnails: { type: Boolean, default: false },
-    videoScheduling: { type: Boolean, default: false },
-    liveStreaming: { type: Boolean, default: false },
-    monetization: { type: Boolean, default: false },
-    advancedAnalytics: { type: Boolean, default: false },
-    
-    // Premium Services
+    maxOfflineDevices: { type: Number, default: 0 },
+    listenWithFriends: { type: Boolean, default: false },
+    liveSessions: { type: Boolean, default: false },
     prioritySupport: { type: Boolean, default: false },
-    conciergeService: { type: Boolean, default: false },
-    betaFeatures: { type: Boolean, default: false },
-    apiAccess: { type: Boolean, default: false }
+    earlyAccess: { type: Boolean, default: false },
+    personalizedRecommendations: { type: Boolean, default: false },
+
+    // Family Plans
+    familyPlan: { type: Boolean, default: false },
+    maxFamilyMembers: { type: Number, default: 1 }
   },
   
   // Plan Change Management
@@ -313,22 +268,5 @@ SubscriptionSchema.index({ currentPeriodEnd: 1 });
 SubscriptionSchema.index({ 'queuedChange.effectiveAt': 1 });
 SubscriptionSchema.index({ 'renewal.nextRenewalAt': 1 });
 SubscriptionSchema.index({ 'engagement.lastActiveAt': -1 });
-
-// Pre-save middleware to update monthly usage
-SubscriptionSchema.pre('save', function(next) {
-  const now = new Date();
-  
-  // Reset monthly counters if new month
-  if (this.isModified('usage.videosUploadedThisMonth')) {
-    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastUpdate = this.updatedAt || this.createdAt;
-    
-    if (lastUpdate < currentMonth) {
-      this.usage.videosUploadedThisMonth = 0;
-    }
-  }
-  
-  next();
-});
 
 export const SubscriptionModel = models.Subscription || model<ISubscription>('Subscription', SubscriptionSchema);

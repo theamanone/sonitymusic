@@ -1,4 +1,4 @@
-// models/plan.model.ts - TRILLION DOLLAR ENHANCEMENT
+// models/plan.model.ts - Music Streaming Platform Plans
 import { Schema, model, models, Document } from 'mongoose';
 
 export interface IPlan extends Document {
@@ -6,7 +6,7 @@ export interface IPlan extends Document {
   displayName: string;
   description: string;
   tagline: string;
-  
+
   // 🌍 International Pricing
   pricing: {
     regions: {
@@ -19,88 +19,56 @@ export interface IPlan extends Document {
     };
     defaultRegion: string;
   };
-  
-  // 🎬 Content Access Control
+
+  // 🎵 Music Streaming Features (NO UPLOADS - License-based content only)
   contentAccess: {
-    regularVideos: boolean; // Always true for all plans
-    premiumMovies: boolean;
-    exclusiveSeries: boolean;
-    originalContent: boolean;
-    earlyAccess: boolean;
+    regularSongs: boolean;
+    premiumSongs: boolean;
+    exclusiveReleases: boolean;
+    officialMusicVideos: boolean; // Unique feature: videos related to songs
     behindTheScenes: boolean;
-    directorsCut: boolean;
+    artistInterviews: boolean;
+    liveSessions: boolean; // Access to live artist performances
   };
-  
-  // 📱 Platform Features
+
   platformFeatures: {
-    // Viewing Experience
+    // Listening Experience
     adsEnabled: boolean;
     skipAdsAfterSeconds: number;
-    maxVideoQuality: '480p' | '720p' | '1080p' | '4K' | '8K';
-    maxConcurrentStreams: number;
-    offlineDownloads: boolean;
-    maxOfflineDownloads: number;
-    downloadExpiry: number; // hours
-    
-    // Social Features
-    canComment: boolean;
-    canLike: boolean;
-    canShare: boolean;
+    highQualityStreaming: boolean; // 320kbps
+    losslessStreaming: boolean; // FLAC quality
+
+    // Social Features (Consumption-focused)
     canCreatePlaylists: boolean;
-    privatePlaylistsLimit: number;
-    publicPlaylistsLimit: number;
-    
-    // Creator Features
-    canUploadVideos: boolean;
-    maxVideoUploadsPerMonth: number;
-    maxVideoLength: number; // seconds
-    maxUploadQuality: '720p' | '1080p' | '4K' | '8K';
-    customThumbnails: boolean;
-    videoScheduling: boolean;
-    liveStreaming: boolean;
-    monetization: boolean;
-    advancedAnalytics: boolean;
-    
-    // Storage & Bandwidth
-    storageQuotaGB: number;
-    bandwidthQuotaGB: number; // per month
-    priorityStreaming: boolean;
-    
-    // Premium Services
+    maxPlaylists: number;
+    canFollowArtists: boolean;
+    canComment: boolean;
+    canShare: boolean;
+    canLikeSongs: boolean;
+
+    // Premium Features (Pure consumption)
+    offlineDownloads: boolean;
+    maxOfflineDevices: number;
+    listenWithFriends: boolean; // Listen together feature
+    liveSessions: boolean; // Join live artist sessions
     prioritySupport: boolean;
-    conciergeService: boolean;
+    earlyAccess: boolean;
     personalizedRecommendations: boolean;
-    betaFeatures: boolean;
-    apiAccess: boolean;
+
+    // Family/Group Plans
+    familyPlan: boolean;
+    maxFamilyMembers: number;
   };
-  
-  // 🎯 Business Features
-  businessFeatures?: {
-    teamMembersLimit: number;
-    brandedPlayer: boolean;
-    whiteLabel: boolean;
-    customDomain: boolean;
-    advancedSecurity: boolean;
-    contentManagement: boolean;
-    bulkOperations: boolean;
-    dedicatedSupport: boolean;
-  };
-  
-  // 🏆 Tier Classification
-  tier: 'free' | 'basic' | 'premium' | 'pro' | 'enterprise';
-  target: 'consumer' | 'creator' | 'business' | 'enterprise';
-  
+
+  // 🏆 Plan Classification
+  tier: 'free' | 'pro' | 'family' | 'student' | 'enterprise';
+  target: 'individual' | 'family' | 'student' | 'business';
+
   // 📊 Marketing & Display
   features: string[];
   benefits: string[];
   popular: boolean;
-  recommended: boolean;
-  exclusive: boolean;
-  limitedTime?: {
-    discountPercent: number;
-    validUntil: Date;
-  };
-  
+
   // 💳 Payment Integration
   paymentIntegration: {
     stripe: {
@@ -110,17 +78,8 @@ export interface IPlan extends Document {
     razorpay: {
       planId: string;
     };
-    paypal: {
-      productId: string;
-    };
-    applePay: {
-      productId: string;
-    };
-    googlePay: {
-      skuId: string;
-    };
   };
-  
+
   // 🎨 UI & Branding
   ui: {
     colorTheme: string;
@@ -129,18 +88,10 @@ export interface IPlan extends Document {
     badge?: string;
     icon?: string;
   };
-  
-  // 📈 Analytics & Limits
-  analytics: {
-    conversionTracking: boolean;
-    userJourneyAnalytics: boolean;
-    revenueAnalytics: boolean;
-    contentPerformance: boolean;
-  };
-  
+
   active: boolean;
   sortOrder: number;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -166,98 +117,58 @@ const PlanSchema = new Schema<IPlan>({
   },
   
   contentAccess: {
-    regularVideos: { type: Boolean, default: true },
-    premiumMovies: { type: Boolean, default: false },
-    exclusiveSeries: { type: Boolean, default: false },
-    originalContent: { type: Boolean, default: false },
-    earlyAccess: { type: Boolean, default: false },
+    regularSongs: { type: Boolean, default: true },
+    premiumSongs: { type: Boolean, default: false },
+    exclusiveReleases: { type: Boolean, default: false },
+    officialMusicVideos: { type: Boolean, default: false }, // Unique feature: videos related to songs
     behindTheScenes: { type: Boolean, default: false },
-    directorsCut: { type: Boolean, default: false }
+    artistInterviews: { type: Boolean, default: false },
+    liveSessions: { type: Boolean, default: false }
   },
-  
+
   platformFeatures: {
-    // Viewing
+    // Listening Experience
     adsEnabled: { type: Boolean, default: true },
     skipAdsAfterSeconds: { type: Number, default: 5 },
-    maxVideoQuality: { 
-      type: String, 
-      enum: ['480p', '720p', '1080p', '4K', '8K'], 
-      default: '720p' 
-    },
-    maxConcurrentStreams: { type: Number, default: 1 },
-    offlineDownloads: { type: Boolean, default: false },
-    maxOfflineDownloads: { type: Number, default: 0 },
-    downloadExpiry: { type: Number, default: 48 },
-    
-    // Social
-    canComment: { type: Boolean, default: true },
-    canLike: { type: Boolean, default: true },
-    canShare: { type: Boolean, default: true },
+    highQualityStreaming: { type: Boolean, default: false }, // 320kbps
+    losslessStreaming: { type: Boolean, default: false }, // FLAC quality
+
+    // Social Features (Consumption-focused)
     canCreatePlaylists: { type: Boolean, default: true },
-    privatePlaylistsLimit: { type: Number, default: 10 },
-    publicPlaylistsLimit: { type: Number, default: 5 },
-    
-    // Creator
-    canUploadVideos: { type: Boolean, default: true },
-    maxVideoUploadsPerMonth: { type: Number, default: -1 }, // -1 = unlimited
-    maxVideoLength: { type: Number, default: -1 },
-    maxUploadQuality: { 
-      type: String, 
-      enum: ['720p', '1080p', '4K', '8K'], 
-      default: '1080p' 
-    },
-    customThumbnails: { type: Boolean, default: false },
-    videoScheduling: { type: Boolean, default: false },
-    liveStreaming: { type: Boolean, default: false },
-    monetization: { type: Boolean, default: false },
-    advancedAnalytics: { type: Boolean, default: false },
-    
-    // Storage
-    storageQuotaGB: { type: Number, default: -1 },
-    bandwidthQuotaGB: { type: Number, default: -1 },
-    priorityStreaming: { type: Boolean, default: false },
-    
-    // Premium
+    maxPlaylists: { type: Number, default: 100 },
+    canFollowArtists: { type: Boolean, default: true },
+    canComment: { type: Boolean, default: true },
+    canShare: { type: Boolean, default: true },
+    canLikeSongs: { type: Boolean, default: true },
+
+    // Premium Features (Pure consumption)
+    offlineDownloads: { type: Boolean, default: false },
+    maxOfflineDevices: { type: Number, default: 0 },
+    listenWithFriends: { type: Boolean, default: false }, // Listen together feature
+    liveSessions: { type: Boolean, default: false }, // Join live artist sessions
     prioritySupport: { type: Boolean, default: false },
-    conciergeService: { type: Boolean, default: false },
+    earlyAccess: { type: Boolean, default: false },
     personalizedRecommendations: { type: Boolean, default: false },
-    betaFeatures: { type: Boolean, default: false },
-    apiAccess: { type: Boolean, default: false }
+
+    // Family/Group Plans
+    familyPlan: { type: Boolean, default: false },
+    maxFamilyMembers: { type: Number, default: 1 }
   },
-  
-  businessFeatures: {
-    teamMembersLimit: { type: Number, default: 1 },
-    brandedPlayer: { type: Boolean, default: false },
-    whiteLabel: { type: Boolean, default: false },
-    customDomain: { type: Boolean, default: false },
-    advancedSecurity: { type: Boolean, default: false },
-    contentManagement: { type: Boolean, default: false },
-    bulkOperations: { type: Boolean, default: false },
-    dedicatedSupport: { type: Boolean, default: false }
+  tier: {
+    type: String,
+    enum: ['free', 'pro', 'family', 'student', 'enterprise'],
+    required: true
   },
-  
-  tier: { 
-    type: String, 
-    enum: ['free', 'basic', 'premium', 'pro', 'enterprise'], 
-    required: true 
-  },
-  target: { 
-    type: String, 
-    enum: ['consumer', 'creator', 'business', 'enterprise'], 
-    default: 'consumer' 
+  target: {
+    type: String,
+    enum: ['individual', 'family', 'student', 'business'],
+    default: 'individual'
   },
   
   features: [String],
   benefits: [String],
   popular: { type: Boolean, default: false },
-  recommended: { type: Boolean, default: false },
-  exclusive: { type: Boolean, default: false },
-  
-  limitedTime: {
-    discountPercent: Number,
-    validUntil: Date
-  },
-  
+
   paymentIntegration: {
     stripe: {
       monthlyPriceId: String,
@@ -265,18 +176,9 @@ const PlanSchema = new Schema<IPlan>({
     },
     razorpay: {
       planId: String
-    },
-    paypal: {
-      productId: String
-    },
-    applePay: {
-      productId: String
-    },
-    googlePay: {
-      skuId: String
     }
   },
-  
+
   ui: {
     colorTheme: { type: String, default: '#6B46C1' },
     gradientFrom: { type: String, default: '#6B46C1' },
@@ -284,14 +186,7 @@ const PlanSchema = new Schema<IPlan>({
     badge: String,
     icon: String
   },
-  
-  analytics: {
-    conversionTracking: { type: Boolean, default: false },
-    userJourneyAnalytics: { type: Boolean, default: false },
-    revenueAnalytics: { type: Boolean, default: false },
-    contentPerformance: { type: Boolean, default: false }
-  },
-  
+
   active: { type: Boolean, default: true },
   sortOrder: { type: Number, default: 0 }
 }, {

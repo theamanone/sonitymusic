@@ -41,12 +41,17 @@ export async function GET(request: NextRequest) {
         priceMonthly: regionalPricing.monthly,
         priceYearly: regionalPricing.yearly,
         currency: regionalPricing.currency || 'USD',
-        // Video platform specific (mapped from platformFeatures)
-        videosPerMonth: p.platformFeatures?.maxVideoUploadsPerMonth ?? -1,
-        maxStorageGB: p.platformFeatures?.storageQuotaGB ?? -1,
-        maxVideoLength: p.platformFeatures?.maxVideoLength ?? -1,
-        canUploadHD: (p.platformFeatures?.maxUploadQuality === '1080p' || p.platformFeatures?.maxUploadQuality === '4K'),
-        canUpload4K: p.platformFeatures?.maxUploadQuality === '4K',
+        songsPerMonth: 0, // No upload limits - pure streaming
+        maxStorageGB: 0, // No storage needed for streaming
+        maxSongLength: 0, // No upload limits
+        canUploadHD: p.platformFeatures?.highQualityStreaming ?? false,
+        canUploadLossless: p.platformFeatures?.losslessStreaming ?? false,
+        canListenWithFriends: p.platformFeatures?.listenWithFriends ?? false,
+        canJoinLiveSessions: p.platformFeatures?.liveSessions ?? false,
+        canAccessMusicVideos: p.contentAccess?.officialMusicVideos ?? false,
+        canCreateUnlimitedPlaylists: (p.platformFeatures?.maxPlaylists ?? 0) > 50,
+        canDownloadOffline: p.platformFeatures?.offlineDownloads ?? false,
+        maxOfflineDevices: p.platformFeatures?.maxOfflineDevices ?? 0,
         active: p.active,
         popular: p.popular || false,
       };
@@ -58,7 +63,7 @@ export async function GET(request: NextRequest) {
         currentPlan: subscription.plan,
         status: subscription.status,
         usage: {
-          videosUploaded: subscription.usage?.videosUploaded || 0,
+          songsListened: subscription.usage?.songsPlayed || 0,
           storageUsed: subscription.usage?.storageUsed || 0
         },
         plans,

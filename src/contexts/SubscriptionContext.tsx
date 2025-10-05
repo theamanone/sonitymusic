@@ -6,11 +6,11 @@ import { useSession } from 'next-auth/react';
 export interface SubscriptionData {
   plan: string;
   status: string;
-  videosUploaded: number;
+  songsListened: number;
   storageUsed: number;
   canWatchAdFree: boolean;
-  canUploadHD: boolean;
-  canUpload4K: boolean;
+  canListenWithFriends: boolean;
+  canJoinLiveSessions: boolean;
   canAccessPremium: boolean;
 }
 
@@ -19,7 +19,7 @@ interface SubscriptionContextType {
   plan: any; // ✅ Add plan property
   loading: boolean;
   refreshSubscription: () => Promise<void>;
-  updateVideoCount: () => void;
+  updateSongCount: () => void;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
@@ -57,18 +57,17 @@ export function SubscriptionProvider({ children, initial, disableAutoFetch }: { 
         }
         throw new Error(`HTTP ${response.status}`);
       }
-      
       const result = await response.json();
       
       if (result.success && result.data) {
         setSubscription({
           plan: result.data.plan || 'free',
           status: result.data.status || 'active',
-          videosUploaded: result.data.videosUploaded || 0,
-          storageUsed: result.data.storageUsed || 0,
+          songsListened: result.data.usage?.songsListened || 0,
+          storageUsed: result.data.usage?.storageUsed || 0,
           canWatchAdFree: !result.data.limits?.adsEnabled,
-          canUploadHD: result.data.limits?.canUploadHD || false,
-          canUpload4K: result.data.limits?.canUpload4K || false,
+          canListenWithFriends: result.data.limits?.listenWithFriends || false,
+          canJoinLiveSessions: result.data.limits?.liveSessions || false,
           canAccessPremium: result.data.limits?.canAccessPremium || false,
         });
       }
@@ -78,11 +77,11 @@ export function SubscriptionProvider({ children, initial, disableAutoFetch }: { 
       setSubscription({
         plan: 'free',
         status: 'active',
-        videosUploaded: 0,
+        songsListened: 0,
         storageUsed: 0,
         canWatchAdFree: false,
-        canUploadHD: false,
-        canUpload4K: false,
+        canListenWithFriends: false,
+        canJoinLiveSessions: false,
         canAccessPremium: false,
       });
     } finally {
@@ -95,11 +94,11 @@ export function SubscriptionProvider({ children, initial, disableAutoFetch }: { 
     await fetchSubscription();
   };
 
-  const updateVideoCount = () => {
+  const updateSongCount = () => {
     if (subscription) {
       setSubscription(prev => prev ? {
         ...prev,
-        videosUploaded: prev.videosUploaded + 1
+        songsListened: prev.songsListened + 1
       } : null);
     }
   };
@@ -135,7 +134,7 @@ return (
     plan: subscription?.plan || null, // ✅ Expose plan directly
     loading,
     refreshSubscription,
-    updateVideoCount
+    updateSongCount
   }}>
     {children}
   </SubscriptionContext.Provider>

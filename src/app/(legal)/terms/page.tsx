@@ -32,8 +32,8 @@ export default function TermsPage() {
               <div className="flex items-start gap-3">
                 <CheckCircleIcon className="h-6 w-6 text-emerald-600 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-slate-900 mb-1">Transparent Billing</h3>
-                  <p className="text-sm text-slate-700">Fair usage-based credits with prorated adjustments</p>
+                  <h3 className="font-semibold text-slate-900 mb-1">Transparent Plans</h3>
+                  <p className="text-sm text-slate-700">Clear subscription tiers with flexible upgrades</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -52,18 +52,17 @@ export default function TermsPage() {
               </div>
             </div>
           </div>
-
           <div className="p-8 space-y-8">
             {/* Section 1 */}
             <section>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">1. Service Agreement</h2>
               <p className="text-slate-800 leading-relaxed mb-4">
-                Sonity operates as a premium music streaming platform. By accessing our services, 
+                Sonity operates as a premium music streaming platform. By accessing our services,
                 you agree to these terms and acknowledge our commitment to delivering an exceptional listening experience.
               </p>
               <p className="text-slate-800 leading-relaxed">
-                Our proprietary AI algorithms provide personalized styling recommendations, wardrobe optimization, 
-                and fashion insights designed for professionals, businesses, and fashion enthusiasts.
+                Our proprietary music intelligence systems provide personalized recommendations, playlist curation,
+                and music discovery designed for music enthusiasts and streaming subscribers.
               </p>
             </section>
 
@@ -99,19 +98,19 @@ export default function TermsPage() {
                   <div className="grid sm:grid-cols-2 gap-4 text-sm">
                     <div className="flex justify-between p-3 bg-slate-50 rounded">
                       <span className="font-medium text-slate-900">Free Plan</span>
-                      <span className="text-slate-700">30 AI consultations/month</span>
+                      <span className="text-slate-700">Unlimited streaming</span>
                     </div>
                     <div className="flex justify-between p-3 bg-slate-50 rounded">
                       <span className="font-medium text-slate-900">Pro Plan ($9.99)</span>
-                      <span className="text-slate-700">500 AI consultations/month</span>
+                      <span className="text-slate-700">High quality + offline</span>
+                    </div>
+                    <div className="flex justify-between p-3 bg-slate-50 rounded">
+                      <span className="font-medium text-slate-900">Family Plan ($14.99)</span>
+                      <span className="text-slate-700">Up to 6 accounts</span>
                     </div>
                     <div className="flex justify-between p-3 bg-slate-50 rounded">
                       <span className="font-medium text-slate-900">Premium ($19.99)</span>
-                      <span className="text-slate-700">2,000 AI consultations/month</span>
-                    </div>
-                    <div className="flex justify-between p-3 bg-slate-50 rounded">
-                      <span className="font-medium text-slate-900">Velissa Black ($200)</span>
-                      <span className="text-slate-700">Unlimited access + dedicated support</span>
+                      <span className="text-slate-700">Lossless + live sessions</span>
                     </div>
                   </div>
                 </div>
@@ -125,26 +124,24 @@ export default function TermsPage() {
 
             {/* Section 4 */}
             <section>
-              <h2 className="text-2xl font-bold text-slate-900 mb-4">4. Intellectual Property & Usage Rights</h2>
               <p className="text-slate-800 leading-relaxed mb-4">
                 Sonity's technology, algorithms, and music intelligence systems are proprietary and protected 
                 by intellectual property laws. You may not reverse engineer, decompile, or attempt to extract our models.
               </p>
               <p className="text-slate-800 leading-relaxed">
-                You retain ownership of any content you provide to our platform. We use this content solely to deliver 
-                personalized fashion recommendations and improve our services.
+                You retain ownership of any playlists you create on our platform. We use listening data solely to deliver
+                personalized music recommendations and improve our music discovery algorithms.
               </p>
             </section>
 
             {/* Section 5 */}
             <section>
-              <h2 className="text-2xl font-bold text-slate-900 mb-4">5. Service Availability & Limitations</h2>
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-4">
                 <h3 className="font-semibold text-amber-900 mb-2">⚠️ Service Limitations</h3>
                 <p className="text-amber-800 text-sm">
-                  While we strive for 99.9% uptime, AI fashion recommendations are subjective. Results may vary based on 
-                  individual preferences, current fashion trends, and available data. VELIESSA is not liable for fashion 
-                  choices or their outcomes.
+                  While we strive for 99.9% uptime, music recommendations are based on listening patterns and may vary.
+                  Content availability depends on licensing agreements with music rights holders. Sonity is not liable for
+                  content licensing changes or temporary unavailability of specific tracks or artists.
                 </p>
               </div>
             </section>

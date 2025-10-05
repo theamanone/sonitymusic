@@ -4,7 +4,7 @@ export interface ILike extends Document {
   _id: string;
   userId: string;
   targetId: string;
-  targetType: "video" | "comment" | "playlist";
+  targetType: "track" | "comment" | "playlist";
   type: "like" | "dislike";
   createdAt: Date;
 }
@@ -21,7 +21,7 @@ const LikeSchema = new Schema<ILike>(
     },
     targetType: {
       type: String,
-      enum: ["video", "comment", "playlist"],
+      enum: ["track", "comment", "playlist"],
       required: true,
     },
     type: {

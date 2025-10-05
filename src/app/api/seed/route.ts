@@ -26,73 +26,60 @@ export async function GET() {
       },
 
       contentAccess: {
-        regularVideos: true,
-        premiumMovies: false,
-        exclusiveSeries: false,
-        originalContent: false,
-        earlyAccess: false,
+        regularSongs: true,
+        premiumSongs: false,
+        exclusiveReleases: false,
+        officialMusicVideos: false, // Unique feature: videos related to songs
         behindTheScenes: false,
-        directorsCut: false
+        artistInterviews: false
       },
 
       platformFeatures: {
-        // No ads for premium users
         adsEnabled: false,
-        maxVideoQuality: '320kbps', // High quality audio
-        maxConcurrentStreams: 1, // Single device for basic premium
-        offlineDownloads: true,
-        maxOfflineDownloads: 10000, // Unlimited downloads
+        skipAdsAfterSeconds: 0,
+        highQualityStreaming: true, // 320kbps
+        losslessStreaming: false, // FLAC for higher tiers
 
-        // Social features for music discovery
-        canComment: true,
-        canLike: true,
-        canShare: true,
+        // Social Features (Pure consumption)
         canCreatePlaylists: true,
-        privatePlaylistsLimit: -1, // Unlimited private playlists
-        publicPlaylistsLimit: -1, // Unlimited public playlists
+        maxPlaylists: -1, // Unlimited
+        canFollowArtists: true,
+        canComment: true,
+        canShare: true,
+        canLikeSongs: true,
 
-        // NO UPLOAD FEATURES - This is Spotify-like (listening only)
-        canUploadVideos: false,
-        maxVideoUploadsPerMonth: 0,
-        maxVideoLength: 0,
-        maxUploadQuality: 'none',
-        customThumbnails: false,
-        videoScheduling: false,
-        liveStreaming: false,
-        monetization: false,
-        advancedAnalytics: false,
-
-        // No storage needed for listeners
-        storageQuotaGB: 0,
-        bandwidthQuotaGB: -1, // Unlimited streaming
-        priorityStreaming: true,
-
-        // Premium support
+        // Premium Features (Pure consumption - NO UPLOADS)
+        offlineDownloads: true,
+        maxOfflineDevices: 10, // High limit for premium
+        listenWithFriends: true, // Listen together feature
+        liveSessions: true, // Join live artist sessions
         prioritySupport: true,
-        conciergeService: false,
+        earlyAccess: true,
         personalizedRecommendations: true,
-        betaFeatures: true,
-        apiAccess: false
-      },
 
-      tier: 'premium',
-      target: 'music_listener',
+        // Family Plan
+        familyPlan: false,
+        maxFamilyMembers: 1
+      },
 
       features: [
         'Ad-free music streaming',
-        'Unlimited skips',
         'High quality audio (320kbps)',
-        'Download unlimited songs for offline listening',
-        'Create unlimited playlists',
+        'Unlimited offline downloads',
+        'Listen with friends',
+        'Live artist sessions',
+        'Unlimited playlists',
+        'Personalized recommendations',
         'Priority customer support',
         'Early access to new features'
       ],
 
       benefits: [
-        'Listen to any song, anytime',
+        'Stream any song, anytime',
         'No interruptions from ads',
         'Download for offline listening',
-        'Create and share playlists',
+        'Listen together with friends',
+        'Join exclusive live sessions',
         'Premium audio quality'
       ],
 

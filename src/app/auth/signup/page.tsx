@@ -1,12 +1,12 @@
 // app/auth/signup/page.tsx - Premium Trial Signup
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Crown, Sparkles, Check, ArrowLeft } from 'lucide-react';
 
-export default function SignupPage() {
+function SignupContent() {
   const searchParams = useSearchParams();
   const [plan, setPlan] = useState('free');
   const [isTrial, setIsTrial] = useState(false);
@@ -14,7 +14,7 @@ export default function SignupPage() {
   useEffect(() => {
     const planParam = searchParams.get('plan');
     const trialParam = searchParams.get('trial');
-    
+
     if (planParam) setPlan(planParam);
     if (trialParam === 'true') setIsTrial(true);
   }, [searchParams]);
@@ -132,5 +132,17 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-fuchsia-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-violet-600"></div>
+      </div>
+    }>
+      <SignupContent />
+    </Suspense>
   );
 }

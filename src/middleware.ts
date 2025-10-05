@@ -18,8 +18,8 @@ const SECURITY_CONFIG = {
   RATE_LIMIT_WINDOW: 60 * 1000,
   RATE_LIMIT_MAX_REQUESTS: isDevelopment ? 5000 : 1000,
   RATE_LIMIT_MAX_AUTH_REQUESTS: isDevelopment ? 200 : 50,
-  RATE_LIMIT_VIDEO_CHUNK_WINDOW: 10 * 1000, // 10 seconds for video chunks
-  RATE_LIMIT_VIDEO_CHUNK_MAX: 100, // Max chunks per 10 seconds
+  RATE_LIMIT_AUDIO_CHUNK_WINDOW: 10 * 1000, // 10 seconds for audio chunks
+  RATE_LIMIT_AUDIO_CHUNK_MAX: 100, // Max chunks per 10 seconds
   RATE_LIMIT_IP_WINDOW: 60 * 1000, // 1 minute for IP-based limits
   RATE_LIMIT_IP_MAX: 5000, // Max requests per IP per minute
   MAX_REQUEST_SIZE: isDevelopment ? 10 * 1024 * 1024 : 1024 * 1024,
@@ -126,11 +126,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Handle legacy watch URLs and ensure proper format
-  if (url.startsWith('/watch/') && url.length > 7) {
-    const videoId = url.split('/watch/')[1];
-    if (videoId && videoId !== 'undefined' && videoId !== 'null') {
-      // Allow the request to continue to the watch page
+  // Handle legacy track URLs and ensure proper format
+  if (url.startsWith('/track/') && url.length > 7) {
+    const trackId = url.split('/track/')[1];
+    if (trackId && trackId !== 'undefined' && trackId !== 'null') {
+      // Allow the request to continue to the track page
     } else {
       return NextResponse.redirect(new URL('/', request.url));
     }
@@ -182,7 +182,7 @@ export async function middleware(request: NextRequest) {
     return new NextResponse('Forbidden', { status: 403 });
   }
 
-  // Skip rate limiting for static assets and video chunks
+  // Skip rate limiting for static assets and audio chunks
   const shouldSkipRateLimit = RATE_LIMIT_EXCLUDED_PATHS.some(path => url.startsWith(path));
   
   if (!shouldSkipRateLimit) {
@@ -210,7 +210,7 @@ export async function middleware(request: NextRequest) {
     // Apply additional rate limiting for audio chunks if needed
     if (url.includes('/stream/') && (url.includes('/tracks/') || url.includes('/audio/'))) {
       const chunkKey = `chunk:${ip}`;
-      if (!checkRateLimit(chunkKey, SECURITY_CONFIG.RATE_LIMIT_VIDEO_CHUNK_MAX, SECURITY_CONFIG.RATE_LIMIT_VIDEO_CHUNK_WINDOW)) {
+      if (!checkRateLimit(chunkKey, SECURITY_CONFIG.RATE_LIMIT_AUDIO_CHUNK_MAX, SECURITY_CONFIG.RATE_LIMIT_AUDIO_CHUNK_WINDOW)) {
         console.log(`[SECURITY] Audio chunk rate limit exceeded for ${ip}`);
         return new NextResponse(JSON.stringify({
           error: 'Too Many Requests',

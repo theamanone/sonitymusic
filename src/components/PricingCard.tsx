@@ -20,7 +20,7 @@ import {
   Database,
   Upload,
 } from "lucide-react";
-import createCinevoRazorpayConfig from "../lib/createCinevoRazorpayConfig";
+import createSonityRazorpayConfig from "../lib/createSonityRazorpayConfig";
 
 declare global {
   interface Window {
@@ -84,7 +84,7 @@ interface Props {
   currentPlan: PlanKey;
   queuedChange?: QueuedChange | null;
   usage: {
-    videosUploaded: number;
+    songsListened: number;
     storageUsed: number;
   };
   plans: UIPlan[];
@@ -133,8 +133,8 @@ export default function PricingCard({
   const getPriceMonthly = (p: any): number =>
     (p as any)?.priceMonthly ?? p?.pricing?.monthly ?? 0;
   const getCurrency = (p: any): string => p?.pricing?.currency ?? "USD";
-  const getVideosPerMonth = (p: any): number =>
-    (p as any)?.videosPerMonth ?? p?.platformFeatures?.maxVideoUploadsPerMonth ?? 0;
+  const getSongsPerMonth = (p: any): number =>
+    (p as any)?.songsPerMonth ?? p?.platformFeatures?.maxSongUploadsPerMonth ?? 0;
   const getMaxStorageGB = (p: any): number =>
     (p as any)?.maxStorageGB ?? p?.platformFeatures?.storageQuotaGB ?? 0;
   const getMaxVideoLengthSec = (p: any): number =>
@@ -248,8 +248,7 @@ export default function PricingCard({
       const targetPlan = plans.find(p => getPlanKey(p) === planKey);
       const planDisplayName = targetPlan?.displayName || planKey;
 
-      // ✅ FIXED: Modern Razorpay options with orderData in correct scope
-      const razorpayOptions = createCinevoRazorpayConfig(
+      const razorpayOptions = createSonityRazorpayConfig(
         orderData, 
         session, 
         planKey, 
@@ -510,22 +509,20 @@ export default function PricingCard({
     );
   };
 
-  // Get enhanced plan features for video platform
+  // Get enhanced plan features for music platform
   const getEnhancedFeatures = (plan: UIPlan) => {
     const baseFeatures = plan.features || [];
-    const vpm = getVideosPerMonth(plan as any);
+    const spm = getSongsPerMonth(plan as any);
     const maxGB = getMaxStorageGB(plan as any);
-    const maxLen = getMaxVideoLengthSec(plan as any);
-    const videoFeatures = [
-      `${vpm === -1 ? "Unlimited" : vpm} videos per month`,
+    const songFeatures = [
+      `${spm === -1 ? "Unlimited" : spm} songs per month`,
       `${formatStorage(maxGB)} storage`,
-      `Up to ${formatDuration(maxLen)} video length`,
     ];
-    return [...videoFeatures, ...baseFeatures.slice(0, 2)];
+    return [...songFeatures, ...baseFeatures.slice(0, 2)];
   };
 
   const currentPlanObjForUnlimited = plans.find((p) => getPlanKey(p) === currentPlan);
-  const isUnlimitedPlan = getVideosPerMonth(currentPlanObjForUnlimited) === -1;
+  const isUnlimitedPlan = getSongsPerMonth(currentPlanObjForUnlimited) === -1;
 
   // ✅ FIXED: Add safety check for plans array
   if (!plans || !Array.isArray(plans) || plans.length === 0) {
@@ -550,7 +547,7 @@ export default function PricingCard({
             className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-700 text-sm font-medium mb-4"
           >
             <Video className="h-3.5 w-3.5" />
-            Premium Video Platform
+            Premium Music Platform
           </motion.div>
 
           <motion.h1
@@ -604,7 +601,7 @@ export default function PricingCard({
               <span className="text-slate-500 hidden sm:inline">•</span>
               <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 whitespace-nowrap">
                 <Upload className="h-3 w-3" />
-                <span>{usage.videosUploaded || 0} videos</span>
+                <span>{usage.songsListened || 0} songs</span>
               </div>
             </div>
           </motion.div>
@@ -642,7 +639,7 @@ export default function PricingCard({
                 isCurrentPlan
               );
               const isFree = planKey === "free";
-              const isUnlimited = getVideosPerMonth(plan) === -1;
+              const isUnlimited = getSongsPerMonth(plan) === -1;
               const monthly = getPriceMonthly(plan);
               const currency = getCurrency(plan);
               const buttonConfig = getButtonConfig(
@@ -747,7 +744,7 @@ export default function PricingCard({
                                   : theme.accent || "text-slate-900"
                               }`}
                             >
-                              {isUnlimited ? "∞" : getVideosPerMonth(plan)}
+                              {isUnlimited ? "∞" : getSongsPerMonth(plan)}
                             </p>
                           </div>
                           <div className="text-center">

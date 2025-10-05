@@ -23,7 +23,11 @@ async function thumbnailHandler(
     // Resize thumbnail based on requested size
     const resizedThumbnail = await resizeThumbnail(thumbnailBuffer, size);
 
-    return new NextResponse(resizedThumbnail, {
+    // Use Blob for thumbnail response
+    const thumbnailCopy = new Uint8Array(resizedThumbnail);
+    const thumbnailBlob = new Blob([thumbnailCopy], { type: 'image/jpeg' });
+
+    return new NextResponse(thumbnailBlob, {
       status: 200,
       headers: {
         'Content-Type': 'image/jpeg',

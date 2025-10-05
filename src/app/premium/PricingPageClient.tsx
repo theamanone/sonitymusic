@@ -20,12 +20,14 @@ type PricingQueuedChange = {
 // Simplified types for premium page
 export interface PricingData {
   currentPlan: string;
+  currentTier: string;
   status: string;
+  region: string;
   usage: {
+    songsListened: number;
+    storageUsed: number;
     songsPlayed: number;
-    playlistsCreated: number;
-    totalListeningTime?: number;
-    offlineDownloads?: number;
+    totalListenTime: number;
   };
   plans: any[];
   queuedChange: PricingQueuedChange;
@@ -64,14 +66,13 @@ function PricingPageContent({ data }: Props) {
   const initialSubscription: SubscriptionData = {
     plan: data.currentPlan,
     status: data.status || "active",
-    videosUploaded: 0,
-    storageUsed: 0,
+    songsListened: data.usage.songsListened || 0,
+    storageUsed: data.usage.storageUsed || 0,
     canWatchAdFree: data.currentPlan !== "free",
-    canUploadHD: true,
-    canUpload4K: data.currentPlan === "premium" || data.currentPlan === "pro",
+    canListenWithFriends: data.currentPlan === "pro" || data.currentPlan === "premium",
+    canJoinLiveSessions: data.currentPlan === "pro" || data.currentPlan === "premium",
     canAccessPremium: data.currentPlan !== "free",
   };
-
   
   return (
     <SubscriptionProvider initial={initialSubscription} disableAutoFetch>

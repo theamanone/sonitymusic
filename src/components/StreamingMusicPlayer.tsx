@@ -556,7 +556,30 @@ export default function StreamingMusicPlayer({
     };
   }, [state.isExpanded, actions]);
 
-  if (!currentTrack) return null;
+  // Emit music player state changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('music-player-change', {
+        detail: {
+          currentTrack,
+          isPlaying: state.isPlaying
+        }
+      });
+      window.dispatchEvent(event);
+
+      // Also update localStorage for cross-tab synchronization
+      if (currentTrack) {
+        localStorage.setItem('sonity-current-track', JSON.stringify(currentTrack));
+        localStorage.setItem('sonity-player-state', JSON.stringify({
+          isPlaying: state.isPlaying,
+          currentTime: state.currentTime
+        }));
+      } else {
+        localStorage.removeItem('sonity-current-track');
+        localStorage.removeItem('sonity-player-state');
+      }
+    }
+  }, [currentTrack, state.isPlaying, state.currentTime]);
 
   return (
     <>
@@ -842,15 +865,15 @@ export default function StreamingMusicPlayer({
       )}
 
       {/* Share Modal */}
-      {isShareOpen && (
+      {isShareOpen && currentTrack && (
         <ShareCard
           track={{
-            id: (currentTrack as any)._id || (currentTrack as any).customTrackId || 'unknown',
-            title: currentTrack.title,
-            artist: currentTrack.artistDetails?.name || 'Unknown Artist',
-            coverArt: currentTrack.coverArt?.default,
-            duration: currentTrack.duration,
-            audioUrl: currentTrack.audioUrl
+            id: currentTrack ? ((currentTrack as any)._id || (currentTrack as any).customTrackId || 'unknown') : 'unknown',
+            title: currentTrack?.title || 'Unknown',
+            artist: currentTrack?.artistDetails?.name || 'Unknown Artist',
+            coverArt: currentTrack?.coverArt?.default || '',
+            duration: currentTrack?.duration || 0,
+            audioUrl: currentTrack?.audioUrl || ''
           }}
           onClose={() => setIsShareOpen(false)}
         />

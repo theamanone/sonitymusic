@@ -50,7 +50,7 @@ const THEME_SCRIPT = (storageKey: string) => `
     // If not found, try to migrate from old key
     if (!stored) {
       // Migration from old theme keys
-      const oldKeys = ['cinevo-theme-config', 'veliessa-theme-config'];
+      const oldKeys = ['veliessa-theme-config'];
       for (const oldKey of oldKeys) {
         const oldStored = localStorage.getItem(oldKey);
         if (oldStored) {

@@ -2,31 +2,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { privateStorage } from '@/lib/storage/private-storage';
 import { withRateLimit, RATE_LIMIT_RULES } from '@/lib/rate-limiting/rate-limiter';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth.config';
 
 async function streamHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
+    // Get NextAuth session
+    const session = await getServerSession(authOptions);
+    const currentUserId = session?.user?.id;
 
-    // For development, allow access without token
-    // In production, you would validate authentication here
-    if (process.env.NODE_ENV === 'production' && !token) {
+    // Check authentication
+    if (!currentUserId) {
       return NextResponse.json(
-        { error: 'Access token required' },
+        { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    // For demo purposes, we'll serve a placeholder response
-    // In a real app, you would stream the actual audio file
-    const audioUrl = `/api/stream/${id}`;
-    
-    return NextResponse.redirect(new URL(audioUrl, request.url));
+    const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const token = searchParams.get('token');
 
+    // Validate access token
+    if (!token || !isValidToken(token, id)) {
+      return NextResponse.json(
+        { error: 'Invalid or expired access token' },
+        { status: 401 }
+      );
+    }
+
+    // Get file from storage
+    const fileData = await privateStorage.getAudioFile(id);
+    if (!fileData) {
+      return NextResponse.json(
+        { error: 'File not found' },
+        { status: 404 }
+      );
+    }
+
+    const { buffer, metadata: fileMetadata } = fileData;
+    const fileSize = buffer.length;
+    const range = request.headers.get('range');
+
+    // Handle range requests for streaming
     if (range) {
       const parts = range.replace(/bytes=/, '').split('-');
       const start = parseInt(parts[0], 10);
@@ -34,34 +55,41 @@ async function streamHandler(
       const chunkSize = (end - start) + 1;
       const chunk = buffer.slice(start, end + 1);
 
-      return new NextResponse(chunk, {
+      // Use Blob for range response
+      const chunkCopy = new Uint8Array(chunk);
+      const chunkBlob = new Blob([chunkCopy], { type: fileMetadata.mimeType || 'audio/mpeg' });
+
+      return new NextResponse(chunkBlob, {
         status: 206,
         headers: {
           'Content-Range': `bytes ${start}-${end}/${fileSize}`,
           'Accept-Ranges': 'bytes',
           'Content-Length': chunkSize.toString(),
-          'Content-Type': metadata.mimeType,
+          'Content-Type': fileMetadata.mimeType || 'audio/mpeg',
           'Cache-Control': 'public, max-age=3600',
           'Access-Control-Allow-Origin': '*',
-          'X-Audio-Title': metadata.metadata?.title || 'Unknown',
-          'X-Audio-Artist': metadata.metadata?.artist || 'Unknown',
-          'X-Audio-Duration': metadata.duration?.toString() || '0'
+          'X-Audio-Title': fileMetadata.metadata?.title || 'Unknown',
+          'X-Audio-Artist': fileMetadata.metadata?.artist || 'Unknown',
+          'X-Audio-Duration': fileMetadata.duration?.toString() || '0'
         },
       });
     }
 
     // Full file response
-    return new NextResponse(buffer, {
+    const bufferCopy = new Uint8Array(buffer);
+    const bufferBlob = new Blob([bufferCopy], { type: fileMetadata.mimeType || 'audio/mpeg' });
+
+    return new NextResponse(bufferBlob, {
       status: 200,
       headers: {
-        'Content-Type': metadata.mimeType,
+        'Content-Type': fileMetadata.mimeType || 'audio/mpeg',
         'Content-Length': fileSize.toString(),
         'Accept-Ranges': 'bytes',
         'Cache-Control': 'public, max-age=3600',
         'Access-Control-Allow-Origin': '*',
-        'X-Audio-Title': metadata.metadata?.title || 'Unknown',
-        'X-Audio-Artist': metadata.metadata?.artist || 'Unknown',
-        'X-Audio-Duration': metadata.duration?.toString() || '0'
+        'X-Audio-Title': fileMetadata.metadata?.title || 'Unknown',
+        'X-Audio-Artist': fileMetadata.metadata?.artist || 'Unknown',
+        'X-Audio-Duration': fileMetadata.duration?.toString() || '0'
       },
     });
 
@@ -100,7 +128,7 @@ function isValidToken(token: string, fileId: string): boolean {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withRateLimit(
     RATE_LIMIT_RULES.AUDIO_STREAM,
@@ -110,7 +138,7 @@ export async function GET(
 
 export async function HEAD(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return GET(request, { params });
 }

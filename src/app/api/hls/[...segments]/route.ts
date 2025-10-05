@@ -66,13 +66,19 @@ export async function GET(
       headers.set('Content-Range', `bytes ${start}-${end}/${fileBuffer.length}`);
       headers.set('Content-Length', chunkSize.toString());
 
-      return new NextResponse(chunk, {
+      // Use Blob with a copied Uint8Array to avoid SharedArrayBuffer typing issues
+      const chunkCopy = new Uint8Array(chunk); // forces a new ArrayBuffer backing store
+      const chunkBlob = new Blob([chunkCopy], { type: contentType });
+      return new NextResponse(chunkBlob, {
         status: 206, // Partial Content
         headers,
       });
     }
 
-    return new NextResponse(fileBuffer, {
+    // Use Blob for full file response with a copied Uint8Array
+    const fileCopy = new Uint8Array(fileBuffer);
+    const fileBlob = new Blob([fileCopy], { type: contentType });
+    return new NextResponse(fileBlob, {
       status: 200,
       headers,
     });
