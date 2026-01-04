@@ -4,15 +4,15 @@ export const SITE_CONFIG = {
   SHORT_NAME: "Sonity",
   TAGLINE: "Listen. Discover. Feel. Your music, your way.",
   DESCRIPTION:
-    "Sonity is an enhanced music streaming platform by Veliessa. Stream millions of songs, create playlists, and enjoy your personal offline library. Experience music like never before.",
+    "Sonity is an enhanced music streaming platform. Stream millions of songs, create playlists, and enjoy your personal offline library. Experience music like never before.",
 
   // Company Information
-  PARENT_COMPANY: "Veliessa",
-  PARENT_COMPANY_URL: process.env.NEXT_PUBLIC_DOMAIN || "https://veliessa.com",
+  PARENT_COMPANY: "",
+  PARENT_COMPANY_URL: "",
 
   // URLs and Domains
-  DOMAIN: process.env.NEXT_PUBLIC_DOMAIN || "https://sonity.veliessa.com",
-  URL: process.env.NEXT_PUBLIC_DOMAIN || "https://sonity.veliessa.com",
+  DOMAIN: process.env.NEXT_PUBLIC_DOMAIN || "http://localhost:3000",
+  URL: process.env.NEXT_PUBLIC_DOMAIN || "http://localhost:3000",
 
   // SEO Keywords
   KEYWORDS: [
@@ -25,30 +25,28 @@ export const SITE_CONFIG = {
     "offline music",
     "music library",
     "sonity",
-    "veliessa",
   ],
   PSYCHOLOGICAL_TRIGGERS: {
     TERTIARY: " ",
   },
   // Authentication
-  AUTH_URL:
-    process.env.NEXT_PUBLIC_NEXTAUTH_URL || "https://account.veliessa.com",
+  AUTH_URL: "",
 
   FOUNDER: {
-    NAME: "Aman",
-    TITLE: "Founder & Product Architect",
-    BIO: "Building Sonity, the ultimate AI-powered music experience.",
-    QUOTE: "Everyone deserves to feel the music.",
+    NAME: "Sonity Team",
+    TITLE: "Music Platform Developers",
+    BIO: "Building Sonity, the ultimate music experience.",
+    QUOTE: "Everyone deserves to feel music.",
   },
   CONTACT: {
-    EMAIL: "support@sonity.veliessa.com",
+    EMAIL: "support@sonity.com",
     PHONE: "+1 (888) SONITY-01",
-    WEBSITE: "https://sonity.veliessa.com",
+    WEBSITE: "http://localhost:3000",
   },
   SOCIAL_LINKS: {
-    Twitter: "https://twitter.com/veliessa",
-    Instagram: "https://instagram.com/veliessa",
-    Reddit: "https://reddit.com/r/veliessa",
+    Twitter: "https://twitter.com/sonity",
+    Instagram: "https://instagram.com/sonity",
+    Reddit: "https://reddit.com/r/sonity",
   },
   LEGAL: {
     TERMS_URL: "/terms",

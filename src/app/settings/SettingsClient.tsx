@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import {
   Bell,
@@ -17,7 +16,6 @@ import {
 } from "lucide-react";
 
 export default function SettingsClient() {
-  const { data: session } = useSession();
   const { 
     isDark, 
     currentTheme, 

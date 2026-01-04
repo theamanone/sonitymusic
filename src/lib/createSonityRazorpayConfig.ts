@@ -238,7 +238,7 @@ function createSupportTicket(response: any, error: any, user: any) {
 // MAIN CONFIGURATION FUNCTION
 const createSonityRazorpayConfig = (
     orderData: any,
-    session: any,
+    session: any | null,
     planKey: string,
     currentPlan: string,
     setIsProcessing: (v: boolean) => void,
@@ -248,16 +248,14 @@ const createSonityRazorpayConfig = (
 
     // SONITY BRANDING & PLATFORM DETECTION
     const platformConfig = {
-        main: { name: 'SONITY by VELIESSA', logo: 'http://localhost:3000/assets/veliessa.png' },
-        fashion: { name: 'VELIESSA Fashion Studio', logo: 'http://localhost:3000/assets/veliessa.png' },
-        premium: { name: 'SONITY Premium', logo: 'http://localhost:3000/assets/veliessa.png' },
-        creator: { name: 'SONITY Creator Studio', logo: 'http://localhost:3000/assets/veliessa.png' }
+        main: { name: 'SONITY', logo: 'http://localhost:3000/assets/logo.png' },
+        premium: { name: 'SONITY Premium', logo: 'http://localhost:3000/assets/logo.png' },
+        creator: { name: 'SONITY Creator Studio', logo: 'http://localhost:3000/assets/logo.png' }
     } as const;
   
     const currentDomain = typeof window !== 'undefined' ? window.location.hostname : '';
     const subdomain = currentDomain.split('.')[0] || 'main';
-    const platformType = subdomain === 'fashion' ? 'fashion' : 
-                        subdomain === 'premium' ? 'premium' :
+    const platformType = subdomain === 'premium' ? 'premium' :
                         subdomain === 'creator' ? 'creator' : 'main';
   
     const branding = platformConfig[platformType];
@@ -319,7 +317,7 @@ const createSonityRazorpayConfig = (
         source: getTrafficSource(),
         campaign: getURLParam('utm_campaign'),
         device_type: getDeviceType(),
-        brand_ecosystem: 'veliessa',
+        brand_ecosystem: 'sonity',
         content_category: getCurrentContentCategory(),
         ltv_segment: calculateLTVSegment(session?.user)
       },
@@ -444,7 +442,7 @@ const createSonityRazorpayConfig = (
               'X-Requested-With': 'XMLHttpRequest',
               'X-Platform': 'sonity',
               'X-Subdomain': subdomain,
-              'X-Brand': 'veliessa'
+              'X-Brand': 'sonity'
             },
             body: JSON.stringify({
               razorpay_payment_id: response.razorpay_payment_id,

@@ -205,3 +205,136 @@
 .safe-area-right {
   padding-right: env(safe-area-inset-right, 0);
 }
+
+/* Cursor pointer fixes */
+button, 
+[role="button"], 
+.cursor-pointer,
+.clickable {
+  cursor: pointer !important;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed !important;
+}
+
+/* iOS 26 Enhanced Glass Effects */
+.ios-glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px) saturate(180%) brightness(120%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(120%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.ios-glass-dark {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(40px) saturate(180%) brightness(80%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(80%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced button states */
+.ios-button {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+}
+
+.ios-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.ios-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* More options dialog fixes */
+.more-options-dialog {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 8px 16px rgba(0, 0, 0, 0.05);
+}
+
+.more-options-item {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.more-options-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: translateX(4px);
+}
+
+/* Spotify-like animations */
+.spotify-scale {
+  transition: transform 0.2s ease;
+}
+
+.spotify-scale:hover {
+  transform: scale(1.05);
+}
+
+.spotify-scale:active {
+  transform: scale(0.95);
+}
+
+/* Text truncation utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+/* Instagram-like reels styles */
+.reels-container {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.reel-item {
+  scroll-snap-align: start;
+}
+
+/* iOS 26 Enhanced Glass Effects for Reels */
+.reels-glass-bg {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.2) 75%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  backdrop-filter: blur(40px) saturate(180%) brightness(110%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(110%);
+}

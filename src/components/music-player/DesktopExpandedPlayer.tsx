@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Play,
   Pause,
@@ -20,9 +21,7 @@ import {
   User,
   Album,
   ListMusic,
-  Info,
   Minimize2,
-  Volume2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProgressBar from "./ProgressBar";
@@ -74,6 +73,7 @@ export default function DesktopExpandedPlayer({
 }: DesktopExpandedPlayerProps) {
   const [showLyrics, setShowLyrics] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [showAddToPlaylist, setShowAddToPlaylist] = useState(false);
   const [audioData, setAudioData] = useState<number[]>([]);
   const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
   
@@ -159,22 +159,56 @@ export default function DesktopExpandedPlayer({
   }, [state.isPlaying]);
 
   const startVisualization = () => {
+    let previousData: number[] = [];
+    let smoothingBuffer: number[][] = [];
+    const bufferSize = 3; // Smooth over 3 frames
+    
     const updateVisualization = () => {
       if (!state.isPlaying) return;
 
-      // Enhanced frequency simulation - optimized
-      const processedData = [];
+      // Enhanced frequency simulation with advanced smoothing
+      const rawData = [];
       const time = Date.now() * 0.001;
       
-      for (let i = 0; i < 32; i++) {
-        const baseFreq = Math.sin(i * 0.2 + time * 3) * 60 + 80;
-        const midFreq = Math.sin(i * 0.15 + time * 2) * 40 + 60;
-        const highFreq = Math.sin(i * 0.1 + time * 4) * 30 + 40;
+      for (let i = 0; i < 40; i++) {
+        // More realistic frequency distribution
+        const bassWeight = i < 8 ? 1.5 : i < 16 ? 1.2 : 1.0;
+        const midWeight = i >= 8 && i < 24 ? 1.3 : 1.0;
+        const trebleWeight = i >= 24 ? 1.4 : 1.0;
+        
+        const baseFreq = Math.sin(i * 0.15 + time * 2.5) * 50 * bassWeight + 60;
+        const midFreq = Math.sin(i * 0.12 + time * 1.8) * 35 * midWeight + 45;
+        const highFreq = Math.sin(i * 0.08 + time * 3.2) * 25 * trebleWeight + 30;
         
         const combined = (baseFreq + midFreq + highFreq) / 3;
-        processedData.push(Math.max(20, combined + Math.random() * 20));
+        const withNoise = combined + (Math.random() - 0.5) * 8;
+        rawData.push(Math.max(15, Math.min(255, withNoise)));
       }
 
+      // Add to smoothing buffer
+      smoothingBuffer.push(rawData);
+      if (smoothingBuffer.length > bufferSize) {
+        smoothingBuffer.shift();
+      }
+
+      // Apply multi-frame smoothing
+      const processedData = [];
+      for (let i = 0; i < 40; i++) {
+        let sum = 0;
+        for (let j = 0; j < smoothingBuffer.length; j++) {
+          sum += smoothingBuffer[j][i];
+        }
+        const averaged = sum / smoothingBuffer.length;
+        
+        // Additional smoothing with previous frame
+        const smoothedValue = previousData[i] 
+          ? previousData[i] * 0.7 + averaged * 0.3
+          : averaged;
+        
+        processedData.push(smoothedValue);
+      }
+
+      previousData = [...processedData];
       setAudioData(processedData);
       animationRef.current = requestAnimationFrame(updateVisualization);
     };
@@ -187,11 +221,8 @@ export default function DesktopExpandedPlayer({
       cancelAnimationFrame(animationRef.current);
       animationRef.current = 0;
     }
-    setTimeout(() => {
-      if (!state.isPlaying) {
-        setAudioData([]);
-      }
-    }, 500);
+    // Immediately clear audio data when stopped
+    setAudioData([]);
   };
 
   // Screen Recording Protection (blur sensitive content)
@@ -403,10 +434,10 @@ export default function DesktopExpandedPlayer({
             <button
               onClick={actions.toggleLike}
               className={cn(
-                "p-3 rounded-2xl backdrop-blur-xl hover:bg-white/80 transition-all duration-300 active:scale-95 cursor-pointer shadow-lg hover:shadow-xl",
+                "p-3 rounded-2xl backdrop-blur-xl  transition-all duration-300 active:scale-95 cursor-pointer ",
                 state.isLiked
-                  ? "text-red-500 bg-red-50"
-                  : "text-gray-600 hover:text-red-500 hover:bg-red-50"
+                  ? "text-red-500"
+                  : "text-gray-600 hover:text-red-500 "
               )}
             >
               <Heart
@@ -506,13 +537,13 @@ export default function DesktopExpandedPlayer({
         {/* Clean Content Area - Responsive */}
         <div className="flex-1 px-2 sm:px-4 lg:px-6 py-4">
           <div className="flex items-center justify-center mb-4 sm:mb-6">
-            <div className="flex bg-white/80 backdrop-blur-2xl rounded-2xl p-1.5 border border-white/40 dark:border-gray-600/40 shadow-lg ring-1 ring-white/20">
+            <div className="flex bg-white/80 backdrop-blur-2xl rounded-full p-1.5 ">
               <button
                 onClick={() => setShowLyrics(false)}
                 className={cn(
-                  "px-6 sm:px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-300 cursor-pointer active:scale-95",
+                  "px-6 sm:px-8 py-3 rounded-full text-sm font-semibold transition-all duration-300 cursor-pointer active:scale-95",
                   !showLyrics
-                    ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
+                    ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white"
                     : "text-gray-700 hover:text-gray-900 hover:bg-white/60"
                 )}
               >
@@ -521,9 +552,9 @@ export default function DesktopExpandedPlayer({
               <button
                 onClick={() => setShowLyrics(true)}
                 className={cn(
-                  "px-6 sm:px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-300 cursor-pointer active:scale-95",
+                  "px-6 sm:px-8 py-3 rounded-full text-sm font-semibold transition-all duration-300 cursor-pointer active:scale-95",
                   showLyrics
-                    ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
+                    ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white"
                     : "text-gray-700 hover:text-gray-900 hover:bg-white/60"
                 )}
               >
@@ -580,14 +611,14 @@ export default function DesktopExpandedPlayer({
               </div>
             ) : (
               /* Enhanced iOS 26 Visualizer - Amazon Music Style */
-              <div className="w-full max-w-4xl h-40 sm:h-56 bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-2xl rounded-3xl flex items-end justify-center gap-1 p-6 sm:p-8 border border-white/30 ring-1 ring-white/20">
+              <div className="w-full max-w-4xl h-40 sm:h-56 bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-2xl rounded-3xl flex items-end justify-center gap-1 p-6 sm:p-8 ring-1 ring-white/20">
                 {state.isPlaying && audioData.length > 0
                   ? audioData
                       .slice(0, window.innerWidth < 640 ? 24 : 40)
                       .map((value, i) => (
                         <div
                           key={i}
-                          className="rounded-full transition-all duration-500 ease-out bg-gradient-to-t from-violet-500 via-fuchsia-500 to-violet-400"
+                          className="rounded-full transition-all duration-700 ease-out bg-gradient-to-t from-violet-500 via-fuchsia-500 to-violet-400"
                           style={{
                             width: window.innerWidth < 640 ? "4px" : "5px",
                             height: `${Math.max(
@@ -605,7 +636,7 @@ export default function DesktopExpandedPlayer({
                       (_, i) => (
                         <div
                           key={i}
-                          className="rounded-full bg-gradient-to-t from-gray-400 to-gray-300"
+                          className="rounded-full bg-gradient-to-t from-gray-400 to-gray-300 animate-pulse transition-all duration-300"
                           style={{
                             width: window.innerWidth < 640 ? "4px" : "5px",
                             height: window.innerWidth < 640 ? "12px" : "16px",
@@ -629,78 +660,151 @@ export default function DesktopExpandedPlayer({
           />
 
           {/* Main Controls */}
-          <div className="flex items-center justify-center gap-4">
-            <button
+          <div className="flex items-center justify-center gap-4 pb-4">
+            <motion.button
               onClick={actions.toggleShuffle}
               className={cn(
-                "p-3 rounded-2xl backdrop-blur-xl hover:bg-white/80 transition-all duration-300 active:scale-95 cursor-pointer shadow-lg hover:shadow-xl",
+                "p-3 rounded-2xl backdrop-blur-xl hover:bg-white/80 transition-all duration-300 cursor-pointer",
                 state.isShuffled
-                  ? "text-blue-600 bg-blue-50"
+                  ? "text-violet-600 bg-white/60"
                   : "text-gray-600 hover:text-gray-800 hover:bg-white/20"
               )}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <Shuffle className="w-4 h-4" />
-            </button>
+              <motion.div
+                animate={{ 
+                  rotate: state.isShuffled ? 360 : 0,
+                  color: state.isShuffled ? "#8b5cf6" : "#6b7280"
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                <Shuffle className="w-4 h-4" />
+              </motion.div>
+            </motion.button>
 
-            <button
+            <motion.button
               onClick={actions.skipToPrevious}
-              className="p-3 rounded-full hover:bg-white/20 transition-all active:scale-95 cursor-pointer"
+              className="p-3 rounded-full hover:bg-white/20 transition-all cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
               <SkipBack className="w-6 h-6 text-gray-700" />
-            </button>
+            </motion.button>
 
             {/* Enhanced Amazon Music Style Play Button */}
-            <button
+            <motion.button
               onClick={actions.togglePlayPause}
-              className="p-5 rounded-3xl backdrop-blur-3xl bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 transition-all duration-300 active:scale-95 cursor-pointer border border-white/40 ring-2 ring-white/30"
+              className="p-5 rounded-3xl backdrop-blur-3xl transition-all duration-300 cursor-pointer"
               disabled={state.isLoading}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              {state.isLoading ? (
-                <div className="w-8 h-8 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : state.isPlaying ? (
-                <Pause className="w-12 h-12 text-white" />
-              ) : (
-                <Play className="w-12 h-12 text-white ml-1" />
-              )}
-            </button>
+              <AnimatePresence mode="wait">
+                {state.isLoading ? (
+                  <motion.div 
+                    key="loading"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="w-8 h-8 border-3 border-gray-700/30 border-t-gray-700 rounded-full animate-spin" 
+                  />
+                ) : state.isPlaying ? (
+                  <motion.div
+                    key="pause"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <Pause className="w-12 h-12 text-gray-700" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="play"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <Play className="w-12 h-12 text-gray-700 ml-1" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
 
-            <button
+            <motion.button
               onClick={actions.skipToNext}
-              className="p-3 rounded-full hover:bg-white/20 transition-all active:scale-95 cursor-pointer"
+              className="p-3 rounded-full hover:bg-white/20 transition-all cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
               <SkipForward className="w-6 h-6 text-gray-700" />
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
               onClick={actions.cycleRepeatMode}
               className={cn(
-                "p-3 rounded-2xl backdrop-blur-xl hover:bg-white/80 transition-all duration-300 active:scale-95 cursor-pointer shadow-lg hover:shadow-xl relative",
+                "p-3 rounded-2xl backdrop-blur-xl hover:bg-white/80 transition-all duration-300 cursor-pointer relative",
                 state.repeatMode !== "none"
-                  ? "text-blue-600 bg-blue-50"
+                  ? "text-violet-600 bg-white/60"
                   : "text-gray-600 hover:text-gray-800 hover:bg-white/20"
               )}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <Repeat className="w-4 h-4" />
-              {state.repeatMode === "one" && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">1</span>
-                </div>
-              )}
-            </button>
+              <motion.div
+                animate={{ 
+                  rotate: state.repeatMode !== 'none' ? 360 : 0,
+                  color: state.repeatMode !== 'none' ? "#8b5cf6" : "#6b7280"
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                <Repeat className="w-4 h-4" />
+              </motion.div>
+              <AnimatePresence>
+                {state.repeatMode === "one" && (
+                  <motion.div 
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    className="absolute -top-1 -right-1 w-3 h-3 bg-violet-600 rounded-full flex items-center justify-center"
+                  >
+                    <span className="text-white text-xs font-bold">1</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
           </div>
 
           {/* Timer Display - Compact */}
-          {remainingTime && (
-            <div className="text-center pt-2">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 rounded-full">
-                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                <Clock className="w-3 h-3 text-gray-600" />
-                <span className="text-xs text-gray-700 font-medium">
-                  Sleep timer: {Math.ceil(remainingTime / 60)} min
-                </span>
-              </div>
-            </div>
-          )}
+          <AnimatePresence>
+            {remainingTime && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="text-center pt-2"
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/40 backdrop-blur-xl rounded-full border border-white/30">
+                  <motion.div 
+                    className="w-1.5 h-1.5 bg-violet-500 rounded-full"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  />
+                  <Clock className="w-3 h-3 text-gray-600" />
+                  <span className="text-xs text-gray-700 font-medium">
+                    Sleep timer: {Math.ceil(remainingTime / 60)} min
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

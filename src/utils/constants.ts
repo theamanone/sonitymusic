@@ -11,14 +11,13 @@ export const COLORS = {
 
 // Known domains that can be referenced by name
 export const KNOWN_DOMAINS: Record<string, string> = {
-  'veliessa': 'https://veliessa.com',
   'instagram': 'https://instagram.com',
   'facebook': 'https://facebook.com',
   'twitter': 'https://twitter.com',
   'youtube': 'https://youtube.com',
   'pinterest': 'https://pinterest.com',
   'tiktok': 'https://tiktok.com',
-  'thefineera': 'https://veliessa.com'
+  'sonity': 'https://sonity.com'
 };
 
 // Common validation patterns

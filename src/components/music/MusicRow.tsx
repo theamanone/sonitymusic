@@ -105,32 +105,11 @@ export default function MusicRow({
                   </div>
                 )}
 
-                {(hoveredTrack === track._id || (isCurrentTrack && isPlaying)) && (
-                  <div 
-                    className={cn(
-                      "absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center transition-all duration-200",
-                      (hoveredTrack === track._id || (isCurrentTrack && isPlaying)) ? "opacity-100" : "opacity-0"
-                    )}
-                  >
-                    <button
-                      onClick={(e) => handlePlayClick(e, track)}
-                      className={cn(
-                        "w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95",
-                        "text-white hover:text-gray-200"
-                      )}
-                      aria-label={isTrackPlaying ? "Pause" : "Play"}
-                    >
-                      {isTrackPlaying ? (
-                        <Pause className="w-4 h-4 sm:w-5 sm:h-5" />
-                      ) : (
-                        <Play className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5" />
-                      )}
-                    </button>
-                  </div>
-                )}
+                {/* Clean Amazon Music Style - No overlay play buttons */}
 
+                {/* Playing indicator moved to bottom corner */}
                 {isTrackPlaying && (
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute bottom-2 right-2">
                     <div className="flex space-x-1">
                       <div className="w-1 h-3 bg-white rounded-full animate-pulse"></div>
                       <div className="w-1 h-4 bg-white rounded-full animate-pulse delay-75"></div>

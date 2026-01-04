@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
-import { useSession } from 'next-auth/react';
 
 export interface SubscriptionData {
   plan: string;
@@ -25,7 +24,6 @@ interface SubscriptionContextType {
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
 export function SubscriptionProvider({ children, initial, disableAutoFetch }: { children: ReactNode; initial?: SubscriptionData; disableAutoFetch?: boolean }) {
-  const { data: session, status } = useSession();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(initial ?? null);
   const [loading, setLoading] = useState(initial ? false : true);
   const hydratedOnce = useRef<boolean>(!!initial);
@@ -35,12 +33,8 @@ export function SubscriptionProvider({ children, initial, disableAutoFetch }: { 
       setLoading(false);
       return;
     }
-    if (status !== 'authenticated' || !session?.user) {
-      setLoading(false);
-      return;
-    }
 
-    // If we already hydrated from SSR once, skip the initial fetch
+    // If we already hydrated from SSR once, skip initial fetch
     if (hydratedOnce.current && subscription) {
       setLoading(false);
       hydratedOnce.current = false; // only skip once
@@ -49,16 +43,27 @@ export function SubscriptionProvider({ children, initial, disableAutoFetch }: { 
 
     try {
       const response = await fetch('/api/v1/subscription');
-      
+        
       if (!response.ok) {
+        // For non-authenticated users, set default free plan
         if (response.status === 401) {
-          console.log('User not authenticated');
+          setSubscription({
+            plan: 'free',
+            status: 'active',
+            songsListened: 0,
+            storageUsed: 0,
+            canWatchAdFree: false,
+            canListenWithFriends: false,
+            canJoinLiveSessions: false,
+            canAccessPremium: false,
+          });
+          setLoading(false);
           return;
         }
         throw new Error(`HTTP ${response.status}`);
       }
       const result = await response.json();
-      
+        
       if (result.success && result.data) {
         setSubscription({
           plan: result.data.plan || 'free',
@@ -104,19 +109,13 @@ export function SubscriptionProvider({ children, initial, disableAutoFetch }: { 
   };
 
   useEffect(() => {
-    if (status === 'loading') return; // Wait for session to load
-    
-    if (!disableAutoFetch && status === 'authenticated' && session?.user) {
+    if (!disableAutoFetch) {
       fetchSubscription();
     } else {
       setLoading(false);
-      // Set null subscription for unauthenticated users
-      if (status === 'unauthenticated') {
-        setSubscription(null);
-      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id, status, disableAutoFetch]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [disableAutoFetch]);
 
   // React to global usage updates (e.g., after video upload)
   useEffect(() => {

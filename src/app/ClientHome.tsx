@@ -33,7 +33,6 @@ export default function ClientHome({
       <HomePage
         trendingTracks={trendingTracks}
         recentTracks={recentTracks}
-        user={user}
       />
     </SubscriptionProvider>
   );

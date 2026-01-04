@@ -1,8 +1,5 @@
 import { SITE_CONFIG } from "@/config/site.config";
 import { Metadata } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth.config";
-import { SubscriptionService } from "@/utils/subscription.service";
 import { type SubscriptionData } from "@/contexts/SubscriptionContext";
 import ClientHome from "./ClientHome";
 
@@ -26,7 +23,14 @@ const mockTracks = [
       // default: '/uploads/Ranjheya-Ve-Punjabi-2022-20231130173851-500x500.jpg',
       // medium: '/uploads/Ranjheya-Ve-Punjabi-2022-20231130173851-500x500.jpg'
     },
-    lyrics: [],
+    lyrics: [
+      {
+        language: 'punjabi',
+        type: 'synced' as const,
+        content: '[00:00]Ranjheya ve, saanu ishq ho gaya\n[00:05]Tere naal pyaar ho gaya\n[00:10]Dil vich tera ghar ho gaya\n[00:15]Saanu tere naal ishq ho gaya\n[00:20]Ranjheya ve, saanu ishq ho gaya\n[00:25]Tere bina adhoora lagda\n[00:30]Har pal tera intezaar karda\n[00:35]Dil mera tere te marda\n[00:40]Saanu tere naal ishq ho gaya',
+        isDefault: true
+      }
+    ],
     processingStatus: 'ready' as const,
     availableQualities: ['mp3'],
     processingProgress: 100,
@@ -142,7 +146,14 @@ const mockTracks = [
       default: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop&crop=center',
       medium: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop&crop=center'
     },
-    lyrics: [],
+    lyrics: [
+      {
+        language: 'hindi',
+        type: 'synced' as const,
+        content: '[00:00]Saiyaara saiyaara, yeh ishq hai ya saza\n[00:08]Saiyaara saiyaara, kyun aaya tu meri raah mein\n[00:16]Dil mein basa hai tera pyaar\n[00:20]Saiyaara saiyaara\n[00:24]Tere bina adhoora sa lagta hai\n[00:28]Yeh dil mera saiyaara\n[00:32]Saiyaara saiyaara, yeh ishq hai ya saza\n[00:40]Saiyaara saiyaara, kyun aaya tu meri raah mein',
+        isDefault: true
+      }
+    ],
     processingStatus: 'ready' as const,
     availableQualities: ['hls'],
     processingProgress: 100,
@@ -508,11 +519,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
-
-  let initialSubscription: SubscriptionData = {
-    plan: "guest",
-    status: "none",
+  // Default subscription for all users (no authentication)
+  const initialSubscription: SubscriptionData = {
+    plan: "free",
+    status: "active",
     songsListened: 0,
     storageUsed: 0,
     canWatchAdFree: false,
@@ -520,39 +530,6 @@ export default async function Home() {
     canJoinLiveSessions: false,
     canAccessPremium: false,
   };
-
-  // Fetch user subscription if logged in
-  if (session?.user?.id) {
-    const subscription = await SubscriptionService.getUserSubscription(session.user.id);
-
-    if (subscription) {
-      const canWatchAdFree = !(subscription.limits?.adsEnabled ?? true);
-      const canAccessPremium = subscription.limits?.canListenToPremiumSongs ?? false;
-
-      initialSubscription = {
-        plan: subscription.plan,
-        status: subscription.status,
-        songsListened: subscription.usage?.songsPlayed || 0,
-        storageUsed: subscription.usage?.storageUsed || 0,
-        canWatchAdFree,
-        canListenWithFriends: subscription.limits?.listenWithFriends ?? false,
-        canJoinLiveSessions: subscription.limits?.liveSessions ?? false,
-        canAccessPremium,
-      };
-    } else {
-      // Fallback to free plan
-      initialSubscription = {
-        plan: "free",
-        status: "active",
-        songsListened: 0,
-        storageUsed: 0,
-        canWatchAdFree: false,
-        canListenWithFriends: false,
-        canJoinLiveSessions: false,
-        canAccessPremium: false,
-      };
-    }
-  }
 
   // Use mock data for demonstration
   const trendingTracks = mockTracks.filter(track => track.trending).slice(0, 6);
@@ -563,7 +540,7 @@ export default async function Home() {
       initialSubscription={initialSubscription}
       trendingTracks={trendingTracks}
       recentTracks={recentTracks}
-      user={session?.user || null}
+      user={null}
     />
   );
 }

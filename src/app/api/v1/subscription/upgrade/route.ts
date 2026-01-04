@@ -1,8 +1,5 @@
-// app/api/v1/subscription/upgrade/route.ts - FIXED VERSION
+// app/api/v1/subscription/upgrade/route.ts - Simplified without authentication
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth.config";
-import { SubscriptionService } from "@/utils/subscription.service";
 import { Plan, IPlan } from "@/models/plan.model";
 import { connectDB } from "@/lib/mongodb";
 import { RazorpayService } from "@/utils/razorpay.service";
@@ -27,21 +24,15 @@ function checkRateLimit(key: string, maxRequests: number, windowMs: number): boo
   rateLimitMap.set(key, requests);
   return true;
 }
-// app/api/v1/subscription/upgrade/route.ts - ENHANCED DEBUG VERSION
+
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
 
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    // Rate limiting
-    const rateLimitKey = `upgrade:${session.user.id}`;
+    // Use IP address for rate limiting instead of user ID
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rateLimitKey = `upgrade:${ip}`;
+    
     if (!checkRateLimit(rateLimitKey, 10, 60000)) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please wait before trying again.' },
@@ -63,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { plan, billingCycle = "monthly" } = requestBody;
-    console.log('✅ Extracted params:', { plan, billingCycle, userId: session.user.id });
+    console.log('✅ Extracted params:', { plan, billingCycle });
     
     // Validation
     if (!plan || typeof plan !== "string" || plan.trim() === "") {
@@ -107,137 +98,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Plan change analysis
-    console.log('🔄 Starting plan change analysis...');
-    let analysis;
+    // Create Razorpay order for upgrade
+    console.log('📈 Handling upgrade - creating Razorpay order...');
+    
+    let orderData;
     try {
-      analysis = await SubscriptionService.analyzePlanChange(session.user.id, plan);
-      console.log('✅ Plan change analysis result:', analysis);
-    } catch (analysisError) {
-      console.error('❌ Plan change analysis failed:', analysisError);
+      // Use a mock user ID for non-authenticated users
+      const mockUserId = `guest_${ip}_${Date.now()}`;
+      orderData = await RazorpayService.createOrder(mockUserId, plan);
+      console.log('✅ Razorpay order created successfully:', { orderId: orderData.orderId });
+    } catch (razorpayError) {
+      console.error('❌ Razorpay order creation failed:', razorpayError);
       return NextResponse.json(
         { 
-          error: "Failed to analyze plan change", 
-          details: analysisError instanceof Error ? analysisError.message : 'Unknown error' 
+          error: "Failed to create payment order",
+          details: razorpayError instanceof Error ? razorpayError.message : 'Payment service unavailable'
         },
         { status: 500 }
       );
     }
 
-    if (analysis.type === "invalid") {
-      console.log('⚠️ Invalid plan change:', analysis.message);
-      return NextResponse.json({ error: analysis.message }, { status: 400 });
-    }
-
-    if (analysis.type === "same") {
-      console.log('⚠️ Same plan selected:', analysis.message);
-      return NextResponse.json({ error: analysis.message }, { status: 400 });
-    }
-
-    // Handle different analysis types
-    if (analysis.type === "queued_update") {
-      console.log('📅 Handling queued update...');
-      const updated = await SubscriptionService.scheduleOrUpdatePlanChange(
-        session.user.id, 
-        plan, 
-        'downgrade'
+    if ((orderData as any)?.skip) {
+      return NextResponse.json(
+        { error: (orderData as any).message || "Order creation skipped" },
+        { status: 400 }
       );
-      
-      if (!updated) {
-        return NextResponse.json({ error: 'Failed to update scheduled change' }, { status: 500 });
-      }
-      
-      return NextResponse.json({
-        success: true,
-        scheduled: true,
-        updated: true,
-        message: analysis.message,
-        effectiveDate: analysis.effectiveDate === 'immediate' ? new Date().toISOString() : 
-                      analysis.effectiveDate instanceof Date ? analysis.effectiveDate.toISOString() : analysis.effectiveDate,
-        conflictResolution: analysis.conflictResolution
-      });
     }
 
-    if (analysis.type === "downgrade") {
-      console.log('📉 Handling downgrade...');
-      const scheduled = await SubscriptionService.scheduleOrUpdatePlanChange(
-        session.user.id,
-        plan,
-        "downgrade"
+    if (!orderData || !orderData.orderId || !orderData.key) {
+      return NextResponse.json(
+        { error: "Invalid order data received from payment gateway" },
+        { status: 500 }
       );
-
-      if (!scheduled) {
-        return NextResponse.json(
-          { error: "Failed to schedule downgrade" },
-          { status: 500 }
-        );
-      }
-
-      return NextResponse.json({
-        success: true,
-        scheduled: true,
-        message: analysis.message,
-        effectiveDate: analysis.effectiveDate === 'immediate' ? new Date().toISOString() : 
-                      analysis.effectiveDate instanceof Date ? analysis.effectiveDate.toISOString() : analysis.effectiveDate,
-      });
     }
 
-    // Handle upgrades
-    if (analysis.type === "upgrade") {
-      console.log('📈 Handling upgrade - creating Razorpay order...');
-      
-      await SubscriptionService.cancelScheduledChange(session.user.id);
+    orderData.prefill = {
+      name: "Guest User",
+      email: "guest@example.com",
+    };
 
-      let orderData;
-      try {
-        orderData = await RazorpayService.createOrder(session.user.id, plan);
-        console.log('✅ Razorpay order created successfully:', { orderId: orderData.orderId });
-      } catch (razorpayError) {
-        console.error('❌ Razorpay order creation failed:', razorpayError);
-        return NextResponse.json(
-          { 
-            error: "Failed to create payment order",
-            details: razorpayError instanceof Error ? razorpayError.message : 'Payment service unavailable'
-          },
-          { status: 500 }
-        );
-      }
-
-      if ((orderData as any)?.skip) {
-        return NextResponse.json(
-          { error: (orderData as any).message || "Order creation skipped" },
-          { status: 400 }
-        );
-      }
-
-      if (!orderData || !orderData.orderId || !orderData.key) {
-        return NextResponse.json(
-          { error: "Invalid order data received from payment gateway" },
-          { status: 500 }
-        );
-      }
-
-      orderData.prefill = {
-        name: session.user.name || "",
-        email: (session.user as any).email || "",
-      };
-
-      return NextResponse.json({
-        success: true,
-        data: orderData,
-        analysis: {
-          type: analysis.type,
-          message: analysis.message,
-          requiresPayment: analysis.requiresPayment
-        },
-      });
-    }
-
-    console.error('❌ Unexpected analysis type:', analysis.type);
-    return NextResponse.json(
-      { error: `Unexpected plan change type: ${analysis.type}` },
-      { status: 400 }
-    );
+    return NextResponse.json({
+      success: true,
+      data: orderData,
+      analysis: {
+        type: "upgrade",
+        message: "Upgrade initiated successfully",
+        requiresPayment: true
+      },
+    });
 
   } catch (error) {
     console.error("❌ Error creating upgrade order:", error);

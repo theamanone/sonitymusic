@@ -3,7 +3,6 @@
 
 import MusicRow from '@/components/music/MusicRow';
 import { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
 import { Play, Clock, Heart, Shuffle, Repeat, List, X } from "lucide-react";
 import { cn, formatNumber, formatDuration } from "@/lib/utils";
 import { TrackWithArtist } from '@/types/track.types';
@@ -11,15 +10,7 @@ import { useViewportHeight } from '@/hooks/useViewportHeight';
 import { useRouter } from "next/navigation";
 import StreamingMusicPlayer from "@/components/StreamingMusicPlayer";
 import { useTheme } from '@/components/providers/ThemeProvider';
-
-interface User {
-  id: string;
-  name?: string;
-  email?: string;
-  avatar?: string;
-  musicTaste?: string[];
-  preferredArtists?: string[];
-}
+ 
 
 interface HomePageProps {
   trendingTracks: TrackWithArtist[];
@@ -32,7 +23,6 @@ export default function HomePage({
 }: HomePageProps) {
   const router = useRouter();
   const viewportHeight = useViewportHeight();
-  const { data: session } = useSession();
   const { isDark } = useTheme();
 
   // Core state management
@@ -299,8 +289,6 @@ export default function HomePage({
           currentTrack={currentTrack}
           playlist={trendingTracks}
           isPlaying={isPlaying}
-          onPlay={handleInstantPlay}
-          onPause={handleInstantPause}
           onPlayStateChange={setIsPlaying}
           onTrackChange={(track: any) => {
             const originalTrack = trendingTracks.find(t =>

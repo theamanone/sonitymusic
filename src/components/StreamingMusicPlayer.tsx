@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useSession } from 'next-auth/react';
 import { cn, formatDuration } from '@/lib/utils';
 import { TrackWithArtist } from '@/types/track.types';
 import { useViewportHeight } from '@/hooks/useViewportHeight';
@@ -289,36 +288,101 @@ export default function StreamingMusicPlayer({
     };
     const handleCanPlay = () => {
       setState(prev => ({ ...prev, isLoading: false }));
+      // Auto-play if state says we should be playing
+      if (state.isPlaying && audio.paused) {
+        audio.play().catch(err => {
+          console.error('Auto-play failed:', err);
+          setState(prev => ({ ...prev, isPlaying: false }));
+          onPlayStateChange?.(false);
+        });
+      }
     };
     const handleLoadStart = () => {
       setState(prev => ({ ...prev, isLoading: true }));
     };
+    const handleCanPlayThrough = () => {
+      setState(prev => ({ ...prev, isLoading: false }));
+      // Ensure playback starts when enough data is loaded
+      if (state.isPlaying && audio.paused) {
+        audio.play().catch(err => {
+          console.error('Playback failed:', err);
+          setState(prev => ({ ...prev, isPlaying: false }));
+          onPlayStateChange?.(false);
+        });
+      }
+    };
+    const handleWaiting = () => {
+      setState(prev => ({ ...prev, isLoading: true }));
+    };
+    const handlePlaying = () => {
+      setState(prev => ({ ...prev, isLoading: false, isPlaying: true }));
+      // Resume HLS network loading if previously stopped
+      if (hlsRef.current) {
+        try { hlsRef.current.startLoad(); } catch {}
+      }
+      onPlayStateChange?.(true);
+    };
+    const handlePause = () => {
+      if (!state.isDragging) {
+        setState(prev => ({ ...prev, isPlaying: false }));
+        // Stop HLS network loading to avoid unnecessary segment requests
+        if (hlsRef.current) {
+          try { hlsRef.current.stopLoad(); } catch {}
+        }
+        onPlayStateChange?.(false);
+      }
+    };
     const handleEnded = () => {
-      setState(prev => ({ ...prev, isPlaying: false }));
-      onPlayStateChange?.(false);
+      // Respect repeat modes
+      if (state.repeatMode === 'one' && audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(console.error);
+        return;
+      }
+
       if (playlist && playlist.length > 0 && currentTrack) {
         const currentIndex = playlist.findIndex(t => (t as any)._id === (currentTrack as any)._id);
+        if (state.repeatMode === 'none') {
+          // If last track and repeat is none, just stop
+          if (currentIndex === playlist.length - 1) {
+            setState(prev => ({ ...prev, isPlaying: false }));
+            onPlayStateChange?.(false);
+            return;
+          }
+        }
         const nextIndex = (currentIndex + 1) % playlist.length;
-        if (nextIndex !== currentIndex) {
+        if (nextIndex !== currentIndex || state.repeatMode === 'all') {
           onTrackChange?.(playlist[nextIndex]);
+          return;
         }
       }
+      // Default: stop
+      setState(prev => ({ ...prev, isPlaying: false }));
+      onPlayStateChange?.(false);
     };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('durationchange', handleDurationChange);
     audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('canplaythrough', handleCanPlayThrough);
     audio.addEventListener('loadstart', handleLoadStart);
+    audio.addEventListener('waiting', handleWaiting);
+    audio.addEventListener('playing', handlePlaying);
+    audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('durationchange', handleDurationChange);
       audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough);
       audio.removeEventListener('loadstart', handleLoadStart);
+      audio.removeEventListener('waiting', handleWaiting);
+      audio.removeEventListener('playing', handlePlaying);
+      audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentTrack, playlist, onTrackChange, onPlayStateChange]);
+  }, [currentTrack, playlist, onTrackChange, onPlayStateChange, state.isPlaying, state.isDragging]);
 
   // HLS Player setup
   useEffect(() => {
@@ -336,7 +400,10 @@ export default function StreamingMusicPlayer({
       const hls = new Hls({
         enableWorker: false,
         lowLatencyMode: true,
-        backBufferLength: 90,
+        backBufferLength: 60,
+        maxBufferLength: 30,
+        maxBufferSize: 20 * 1000 * 1000, // 20MB
+        autoStartLoad: false, // defer network until play
       });
       
       hls.loadSource(currentTrack.audioUrl);
@@ -348,6 +415,7 @@ export default function StreamingMusicPlayer({
         setState(prev => ({ ...prev, isLoading: false }));
         
         if (state.isPlaying && audioRef.current) {
+          try { hls.startLoad(); } catch {}
           audioRef.current.play().catch(console.error);
         }
       });
@@ -613,29 +681,8 @@ export default function StreamingMusicPlayer({
         paddingTop: state.isExpanded ? 'env(safe-area-inset-top)' : '0'
       }}>
         <div className="relative h-full">
-          {/* iOS 16-style glass background layers */}
-          {state.isExpanded ? (
-            <>
-              {/* Blurred cover backdrop */}
-              {currentTrack?.coverArt?.default && (
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage: `url(${currentTrack.coverArt.default})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    filter: 'blur(60px) saturate(1.8)',
-                    opacity: 0.15,
-                    transform: 'scale(1.1)'
-                  }}
-                />
-              )}
-              {/* iOS-style glass overlay with enhanced blur */}
-              <div className="absolute inset-0 bg-gradient-to-b from-[var(--ios-glass-heavy)] via-[var(--ios-glass-medium)] to-[var(--ios-glass-light)] backdrop-blur-[40px] backdrop-saturate-[1.8]" />
-              {/* Subtle noise texture */}
-              <div className="absolute inset-0 opacity-[0.015] bg-[radial-gradient(circle_at_1px_1px,var(--text-primary)_1px,transparent_0)] bg-[length:24px_24px]" />
-            </>
-          ) : (
+          {/* Background layers - only for mini player */}
+          {!state.isExpanded && (
             <div className="absolute inset-0 bg-[var(--glass-bg)] backdrop-blur-3xl border-t border-[var(--border-primary)]" />
           )}
 
@@ -754,7 +801,7 @@ export default function StreamingMusicPlayer({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        state.isPlaying ? actions.pause() : actions.play();
+                        actions.togglePlayPause();
                       }}
                       className="p-2 sm:p-2.5 rounded-full hover:bg-white/10 transition-all active:scale-95"
                       disabled={state.isLoading}

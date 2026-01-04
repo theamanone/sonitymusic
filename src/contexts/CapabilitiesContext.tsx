@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { useSession } from "next-auth/react";
 
 interface Capabilities {
   canAccessPremium: boolean;
@@ -18,23 +17,20 @@ type CapabilitiesContextType = {
 const CapabilitiesContext = createContext<CapabilitiesContextType | undefined>(undefined);
 
 export function CapabilitiesProvider({ children }: { children: ReactNode }) {
-  const { data: session, status } = useSession();
   const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchCapabilities = async () => {
-    if (!session?.user) {
-      // Set default capabilities for non-authenticated users
-      setCapabilities({
-        canAccessPremium: false,
-        canComment: false,
-        canCreatePlaylist: false,
-        canListenWithFriends: false,
-        maxPlaylists: 10,
-      });
-      setLoading(false);
-      return;
-    }
+    // Set default capabilities for all users
+    setCapabilities({
+      canAccessPremium: false,
+      canComment: false,
+      canCreatePlaylist: false,
+      canListenWithFriends: false,
+      maxPlaylists: 10,
+    });
+    setLoading(false);
+    return;
 
     try {
       const res = await fetch("/api/v1/capabilities", { cache: "no-store" });
@@ -63,9 +59,8 @@ export function CapabilitiesProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (status === 'loading') return; // Wait for session to load
     fetchCapabilities();
-  }, [session, status]);
+  }, []);
 
   return (
     <CapabilitiesContext.Provider value={{ capabilities, loading, refresh: fetchCapabilities }}>

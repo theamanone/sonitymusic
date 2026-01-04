@@ -79,20 +79,7 @@ export default function MusicCard({
           <div className="absolute inset-0 bg-gray-300 animate-pulse" />
         )}
 
-        {/* Play/Pause Button Overlay */}
-        <div
-          className={cn(
-            "absolute inset-0 bg-black/40 flex items-center justify-center transition-all duration-300",
-            isHovered || track.featured ? "opacity-100" : "opacity-0"
-          )}
-        >
-          <button
-            onClick={handlePlayClick}
-            className="bg-green-500 hover:bg-green-400 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 shadow-lg"
-          >
-            <Play className="w-5 h-5 fill-current" />
-          </button>
-        </div>
+        {/* Clean Amazon Music Style - No overlay icons */}
 
         {/* Explicit Content Badge */}
         {track.explicit && (
@@ -146,18 +133,7 @@ export default function MusicCard({
         </div>
       </div>
 
-      {/* Hover Actions */}
-      <div className={cn(
-        "absolute top-2 left-2 flex gap-2 transition-all duration-300",
-        isHovered ? "opacity-100" : "opacity-0"
-      )}>
-        <button className="bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all duration-200 hover:scale-110">
-          <Heart className="w-4 h-4" />
-        </button>
-        <button className="bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all duration-200 hover:scale-110">
-          <MoreHorizontal className="w-4 h-4" />
-        </button>
-      </div>
+      {/* Clean design - controls handled separately */}
     </div>
   );
 }

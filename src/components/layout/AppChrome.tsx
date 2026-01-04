@@ -97,7 +97,7 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
     return (
       <SmoothRouter>
         <Navbar />
-        <main className="min-h-screen relative overflow-hidden">
+        <main className="min-h-screen relative overflow-hidden pt-20 sm:pt-24">
           {children}
         </main>
         <Footer />
@@ -108,7 +108,7 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
   return (
     <SmoothRouter>
       <Navbar />
-      <main className={mainClassName}>
+      <main className={`${mainClassName} pt-20 sm:pt-24`}>
         {children}
       </main>
       {/* Show footer only when music player is not active or when on mobile - only after mounting */}

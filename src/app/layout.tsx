@@ -4,7 +4,6 @@ import "./globals.css";
 import { SITE_CONFIG } from "@/config/site.config";
 import ClientProvider from "@/components/providers/ClientProvider";
 import AppProviders from "@/components/providers/AppProviders";
-import SecurityProvider from "@/components/security/SecurityProvider";
 import AppChrome from "@/components/layout/AppChrome";
 import LoadingProgress from "@/components/ui/LoadingProgress";
 
@@ -63,7 +62,7 @@ export const metadata: Metadata = {
     title: `${SITE_CONFIG.NAME} - Enhanced Music Streaming`,
     description: SITE_CONFIG.DESCRIPTION,
     images: ["/assets/og-image.jpg"],
-    creator: "@veliessa",
+    creator: "@sonity",
   },
   robots: {
     index: true,
@@ -94,9 +93,8 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        <link rel="dns-prefetch" href="https://api.veliessa.com" />
-        <link rel="dns-prefetch" href="https://account.veliessa.com" />
-        <link rel="preload" href="/assets/veliessa.png" as="image" />
+        <link rel="dns-prefetch" href="https://api.sonity.com" />
+        <link rel="preload" href="/assets/logo.png" as="image" />
         <link rel="prefetch" href="/genres" />
         <link rel="prefetch" href="/artists" />
         <link rel="prefetch" href="/playlists" />
@@ -170,12 +168,10 @@ export default function RootLayout({
       >
         <ClientProvider>
           <AppProviders>
-            <SecurityProvider>
-              <AppChrome>
-                <LoadingProgress />
-                {children}
-              </AppChrome>
-            </SecurityProvider>
+            <AppChrome>
+              <LoadingProgress />
+              {children}
+            </AppChrome>
           </AppProviders>
         </ClientProvider>
       </body>

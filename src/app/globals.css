@@ -1,7 +1,6 @@
 /* globals.css - Fixed version without @apply warnings */
 @import "../styles/themes.css";
 @import "tailwindcss";
-@import "../styles/veliessa.css";
 @import "../styles/player.css";
 
 :root {

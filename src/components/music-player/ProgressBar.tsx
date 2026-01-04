@@ -158,15 +158,7 @@ export default function ProgressBar({
           }}
         />
 
-        {/* Hover Preview Line - Only show when not dragging */}
-        {isHovering && !isDragging && (
-          <div
-            className="absolute top-0 left-0 right-0 h-full pointer-events-none"
-            style={{
-              background: `linear-gradient(90deg, transparent ${progress}%, rgba(139, 92, 246, 0.3) ${progress}%, rgba(139, 92, 246, 0.3) ${progress + 0.1}%, transparent ${progress + 0.1}%)`
-            }}
-          />
-        )}
+        {/* Removed hover preview line to avoid thin straight line artifacts */}
       </div>
 
       {/* Time Display - Better contrast */}

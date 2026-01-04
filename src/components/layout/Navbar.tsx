@@ -1,9 +1,8 @@
-// components/layout/Navbar.tsx - Music Streaming Navbar
+// components/layout/Navbar.tsx - Music Streaming Navbar (No Authentication)
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
 import { SITE_CONFIG } from "@/config/site.config";
 import Image from "next/image";
 import { ASSETS } from "@/utils/constants/assets.constants";
@@ -19,21 +18,15 @@ import {
   Moon,
   Search,
   Menu,
-  User,
-  Crown,
-  ChevronDown,
-  Bell,
 } from 'lucide-react';
 import NotificationModal from "@/components/ui/NotificationModal";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import MobileSidebar from "@/components/layout/MobileSidebar";
 
 export default function Navbar() {
-  const { data: session } = useSession();
   const { isDark, themeClasses, toggleTheme } = useTheme();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
@@ -41,7 +34,6 @@ export default function Navbar() {
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
 
   const searchRef = useRef<HTMLDivElement>(null);
-  const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Handle mounting for theme
   useEffect(() => setMounted(true), []);
@@ -55,156 +47,118 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close dropdowns when clicking outside
+  // Handle search
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Navigate to search results
+      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
+    }
+  };
+
+  // Handle click outside search
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsSearchFocused(false);
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setIsUserMenuOpen(false);
-      }
-      // Mobile menu removed - using sidebar instead
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
-    }
-  };
-
-  const isPremiumUser = false;
-
-  // Prevent rendering until mounted to avoid hydration mismatch
-  if (!mounted) {
-    return (
-      <div className="fixed top-0 left-0 right-0 z-50 h-[70px] bg-transparent" />
-    );
-  }
+  if (!mounted) return null;
 
   return (
     <>
-      {/* iOS 26 Glass Morphism Navigation Bar */}
-      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300`}
-        style={{
-          background: scrolled 
-            ? isDark 
-              ? 'rgba(17, 24, 39, 0.85)' 
-              : 'rgba(255, 255, 255, 0.85)'
-            : isDark
-              ? 'rgba(17, 24, 39, 0.7)'
-              : 'rgba(255, 255, 255, 0.7)',
-          backdropFilter: scrolled ? 'blur(30px) saturate(180%)' : 'blur(20px) saturate(150%)',
-          WebkitBackdropFilter: scrolled ? 'blur(30px) saturate(180%)' : 'blur(20px) saturate(150%)',
-          borderBottom: scrolled 
-            ? isDark
-              ? '1px solid rgba(156, 163, 175, 0.15)'
-              : '1px solid rgba(229, 231, 235, 0.3)'
-            : 'none',
-          boxShadow: scrolled
-            ? '0 10px 40px rgba(0, 0, 0, 0.08)'
-            : 'none'
-        }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="flex items-center justify-between h-[60px] sm:h-[70px]">
-
-            {/* Logo & Navigation */}
-            <div className="flex items-center space-x-6 lg:space-x-8">
-              <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group">
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? isDark 
+            ? 'bg-gray-900/95 backdrop-blur-lg border-b border-gray-800/50 shadow-lg shadow-black/20' 
+            : 'bg-white/95 backdrop-blur-lg border-b border-gray-200/50 shadow-lg shadow-gray-900/10'
+          : isDark 
+            ? 'bg-gray-900/90 backdrop-blur-md border-b border-gray-800/30' 
+            : 'bg-white/90 backdrop-blur-md border-b border-gray-200/30'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            {/* Logo */}
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="flex items-center space-x-3 group">
                 <div className="relative">
+                  <div className={`absolute inset-0 rounded-xl transition-all duration-300 ${
+                    isDark ? 'bg-green-500/20' : 'bg-green-500/10'
+                  } group-hover:scale-110`} />
                   <Image
                     src={ASSETS.LOGO.PRIMARY}
-                    alt="Sonity Logo"
-                    width={32}
-                    height={32}
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg transition-all duration-300 group-hover:scale-110"
-                    style={{ width: 'auto', height: 'auto' }}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      target.nextElementSibling?.classList.remove('hidden');
-                    }}
+                    alt={SITE_CONFIG.NAME}
+                    width={40}
+                    height={40}
+                    className="relative w-10 h-10 rounded-xl object-cover"
                   />
-                  <div className="absolute inset-0 w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg items-center justify-center hidden">
-                    <Music className="w-4 h-4 text-white" />
-                  </div>
                 </div>
-                {/* App Name - Show on mobile and larger screens */}
-                <span className="font-bold text-base sm:text-lg bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  {SITE_CONFIG.NAME}
-                </span>
+                <div className="hidden sm:block">
+                  <h1 className={`text-xl font-bold transition-colors duration-200 ${
+                    isDark ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {SITE_CONFIG.NAME}
+                  </h1>
+                  <p className={`text-xs transition-colors duration-200 ${
+                    isDark ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
+                    Music Streaming
+                  </p>
+                </div>
               </Link>
-
-              {/* Music Navigation Links */}
-              <div className="hidden lg:flex items-center space-x-2">
-                <Link
-                  href="/"
-                  className={`flex items-center space-x-2 px-4 py-2 font-medium rounded-lg cursor-pointer transition-colors duration-200 ${
-                    isDark
-                      ? 'text-white bg-gray-800 hover:bg-gray-700'
-                      : 'text-gray-900 bg-gray-100 hover:bg-gray-200'
-                  }`}
-                >
-                  <Home className="w-4 h-4" />
-                  <span>Home</span>
-                </Link>
-
-                <Link
-                  href="/discover"
-                  className={`flex items-center space-x-2 px-4 py-2 font-medium rounded-lg cursor-pointer transition-colors duration-200 ${
-                    isDark
-                      ? 'text-gray-300 hover:text-white hover:bg-gray-800'
-                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  <TrendingUp className="w-4 h-4" />
-                  <span>Discover</span>
-                </Link>
-
-                <Link
-                  href="/library"
-                  className={`flex items-center space-x-2 px-4 py-2 font-medium rounded-lg cursor-pointer transition-colors duration-200 ${
-                    isDark
-                      ? 'text-gray-300 hover:text-white hover:bg-gray-800'
-                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  <Library className="w-4 h-4" />
-                  <span>Library</span>
-                </Link>
-
-                <Link
-                  href="/genres"
-                  className={`flex items-center space-x-2 px-4 py-2 font-medium rounded-lg cursor-pointer transition-colors duration-200 ${
-                    isDark
-                      ? 'text-gray-300 hover:text-white hover:bg-gray-800'
-                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  <Music className="w-4 h-4" />
-                  <span>Genres</span>
-                </Link>
-
-                <Link
-                  href="/artists"
-                  className={`flex items-center space-x-2 px-4 py-2 font-medium rounded-lg cursor-pointer transition-colors duration-200 ${
-                    isDark
-                      ? 'text-gray-300 hover:text-white hover:bg-gray-800'
-                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  <User className="w-4 h-4" />
-                  <span>Artists</span>
-                </Link>
-              </div>
             </div>
 
-            {/* Music Search Bar */}
-            <div className="hidden md:flex flex-1 max-w-2xl mx-8" ref={searchRef}>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-1">
+              <Link href="/" className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
+                isDark 
+                  ? 'text-gray-300 hover:text-white hover:bg-gray-800' 
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}>
+                <div className="flex items-center space-x-2">
+                  <Home className="w-4 h-4" />
+                  <span>Home</span>
+                </div>
+              </Link>
+              <Link href="/trending" className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
+                isDark 
+                  ? 'text-gray-300 hover:text-white hover:bg-gray-800' 
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}>
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="w-4 h-4" />
+                  <span>Trending</span>
+                </div>
+              </Link>
+              <Link href="/library" className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
+                isDark 
+                  ? 'text-gray-300 hover:text-white hover:bg-gray-800' 
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}>
+                <div className="flex items-center space-x-2">
+                  <Library className="w-4 h-4" />
+                  <span>Library</span>
+                </div>
+              </Link>
+              <Link href="/settings" className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
+                isDark 
+                  ? 'text-gray-300 hover:text-white hover:bg-gray-800' 
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}>
+                <div className="flex items-center space-x-2">
+                  <Settings className="w-4 h-4" />
+                  <span>Settings</span>
+                </div>
+              </Link>
+            </nav>
+
+            {/* Search Bar */}
+            <div className="hidden lg:block flex-1 max-w-md mx-8">
               <form onSubmit={handleSearch} className="relative w-full">
                 <div className="relative">
                   <input
@@ -228,141 +182,20 @@ export default function Navbar() {
               </form>
             </div>
 
-            {/* Music Right Actions */}
+            {/* Right Actions - No Authentication */}
             <div className="flex items-center space-x-2 sm:space-x-3">
-              {session ? (
-                <>
-                  {/* Direct Profile Link */}
-                  <Link href="/profile">
-                    <div
-                      className={`flex items-center space-x-2 sm:space-x-3 p-2 rounded-lg cursor-pointer transition-colors duration-200 group ${
-                        isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
-                      }`}
-                    >
-                      <div className="relative">
-                        {session.user?.avatar ? (
-                          <Image
-                            src={session.user.avatar}
-                            alt="Profile"
-                            width={36}
-                            height={36}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600 transition-colors duration-200 group-hover:border-green-500"
-                          />
-                        ) : (
-                          <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ${
-                            isDark
-                              ? 'bg-gray-700 border-gray-600 group-hover:border-green-500'
-                              : 'bg-gray-200 border-gray-300 group-hover:border-green-500'
-                          }`}>
-                            <span className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-700'}`}>
-                              {session.user?.name?.charAt(0) || "U"}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="hidden xl:block text-left">
-                        <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          {session.user?.name}
-                        </p>
-                        {isPremiumUser && (
-                          <p className="text-xs text-yellow-600 flex items-center">
-                            <Crown className="w-3 h-3 mr-1" />
-                            Premium
-                          </p>
-                        )}
-                      </div>
-
-                    </div>
-                  </Link>
-
-                    {/* Remove dropdown menu - keeping only the profile link above */}
-                    {false && (
-                      <div className={`absolute right-0 mt-2 w-56 rounded-3xl border shadow-xl z-50 transition-all duration-300 backdrop-blur-2xl ${
-                        isDark
-                          ? 'bg-gray-900/90 border-gray-700/50'
-                          : 'bg-white/90 border-gray-200/50'
-                      }`}>
-
-                        {/* User Header - Enhanced Glass */}
-                        <div className={`px-6 py-4 border-b ${isDark ? 'border-gray-700/50' : 'border-gray-200/60'}`}>
-                          <div className="flex items-center space-x-3">
-                              <Image
-                                src={session?.user?.avatar ?? ASSETS.FALLBACK.USER.AVATAR}
-                                alt="Profile"
-                                width={40}
-                                height={40}
-                                className="w-10 h-10 rounded-full object-cover ring-2 ring-white/20"
-                                style={{ width: 'auto', height: 'auto' }}
-                              />
-                            <div>
-                              <h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                {session?.user?.name}
-                              </h3>
-                              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                Premium Member
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Main Menu Items - Enhanced Glass */}
-                        <div className="py-3">
-                          <Link
-                            href="/profile"
-                            className={`flex items-center px-6 py-3 cursor-pointer transition-colors duration-200 ${
-                              isDark
-                                ? 'text-gray-300 hover:text-white hover:bg-gray-800/50'
-                                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50/80'
-                            }`}
-                            onClick={() => setIsUserMenuOpen(false)}
-                          >
-                            <User className="w-4 h-4 mr-3" />
-                            <span className="font-medium">Profile</span>
-                          </Link>
-
-                          <Link
-                            href="/settings"
-                            className={`flex items-center px-6 py-3 cursor-pointer transition-colors duration-200 ${
-                              isDark
-                                ? 'text-gray-300 hover:text-white hover:bg-gray-800/50'
-                                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50/80'
-                            }`}
-                            onClick={() => setIsUserMenuOpen(false)}
-                          >
-                            <Settings className="w-4 h-4 mr-3" />
-                            <span className="font-medium">Settings</span>
-                          </Link>
-                        </div>
-
-                        {/* Direct Profile Link */}
-                        <div className={`border-t pt-3 ${isDark ? 'border-gray-700/50' : 'border-gray-200/60'}`}>
-                          <a
-                            href="https://account.veliessa.com/profile"
-                            className="flex items-center w-full px-6 py-3 text-violet-600 hover:text-violet-500 hover:bg-violet-50/50 cursor-pointer transition-colors duration-200 rounded-b-3xl"
-                            onClick={() => setIsUserMenuOpen(false)}
-                          >
-                            <User className="w-4 h-4 mr-3" />
-                            <span className="font-medium">Profile & Settings</span>
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                </>
-              ) : (
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <a
-                    href={`${SITE_CONFIG.AUTH_URL}/login`}
-                    className={`font-medium px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl cursor-pointer transition-all duration-300 text-sm sm:text-base backdrop-blur-xl border shadow-lg hover:scale-105 active:scale-95 ${
-                      isDark
-                        ? 'text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 border-violet-500/30'
-                        : 'text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 border-violet-500/30'
-                    }`}
-                  >
-                    Get Started
-                  </a>
-                </div>
-              )}
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className={`p-2 sm:p-3 rounded-lg cursor-pointer transition-colors duration-200 ${
+                  isDark
+                    ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+                title="Toggle theme"
+              >
+                {isDark ? <Sun className="w-5 h-5 sm:w-6 sm:h-6" /> : <Moon className="w-5 h-5 sm:w-6 sm:h-6" />}
+              </button>
 
               {/* Mobile Menu Button */}
               <button
@@ -378,16 +211,13 @@ export default function Navbar() {
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Sidebar */}
-        <MobileSidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
-      </nav>
-
-      {/* Fixed spacer to prevent content jump */}
-      <div className="h-[60px] sm:h-[70px] md:h-[80px]" />
+      {/* Mobile Sidebar */}
+      <MobileSidebar 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+      />
     </>
   );
 }

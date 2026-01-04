@@ -1,14 +1,12 @@
-// components/layout/MobileSidebar.tsx - Right sliding sidebar for mobile
+// components/layout/MobileSidebar.tsx - Right sliding sidebar for mobile (No Authentication)
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { ASSETS } from "@/utils/constants/assets.constants";
 import {
   X,
-  User,
   Home,
   Music,
   Heart,
@@ -16,14 +14,13 @@ import {
   Library,
   Users,
   Settings,
-  Crown,
-  Bell,
   ChevronRight,
   Sun,
   Moon,
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { SITE_CONFIG } from "@/config/site.config";
 
 interface MobileSidebarProps {
   isOpen: boolean;
@@ -31,7 +28,6 @@ interface MobileSidebarProps {
 }
 
 export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
-  const { data: session } = useSession();
   const { isDark, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -50,195 +46,128 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
+      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 
-  if (!mounted) return null;
-
+  // Navigation items
   const navigationItems = [
-    { icon: Home, label: 'Home', href: '/' },
-    { icon: TrendingUp, label: 'Trending', href: '/trending' },
-    { icon: Music, label: 'Genres', href: '/genres' },
-    { icon: Users, label: 'Artists', href: '/artists' },
-    { icon: Library, label: 'Playlists', href: '/playlists' },
-    { icon: Heart, label: 'Liked Songs', href: '/liked' },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/trending", label: "Trending", icon: TrendingUp },
+    { href: "/library", label: "Library", icon: Library },
+    { href: "/settings", label: "Settings", icon: Settings },
   ];
 
-  return (
-    <div className="z-[100]">
-      {/* Backdrop */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-[140] bg-black/40 backdrop-blur-sm transition-opacity duration-300"
-          onClick={onClose}
-        />
-      )}
+  if (!mounted) return null;
 
-      {/* iOS 26 Glass Morphism Sidebar */}
-      <div className={cn(
-        "fixed top-0 right-0 h-full w-80 max-w-[85vw] z-[190] transform transition-transform duration-300 ease-out",
-        isOpen ? "translate-x-0" : "translate-x-full"
-      )}
-      style={{
-        background: isDark 
-          ? 'rgba(17, 24, 39, 0.95)' 
-          : 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(30px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-        borderLeft: isDark
-          ? '1px solid rgba(156, 163, 175, 0.15)'
-          : '1px solid rgba(229, 231, 235, 0.3)',
-        boxShadow: '-10px 0 40px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div className="flex flex-col h-full relative z-10">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b" style={{
-            borderColor: isDark ? 'rgba(156, 163, 175, 0.15)' : 'rgba(229, 231, 235, 0.3)'
-          }}>
-            <div className="flex items-center gap-3">
-              <Image
-                src={ASSETS.LOGO.PRIMARY}
-                alt="Sonity"
-                width={32}
-                height={32}
-                style={{ width: 'auto', height: 'auto' }}
-                className="rounded-lg"
-              />
-              <span className={cn(
-                "text-xl font-bold",
-                isDark ? "text-white" : "text-gray-900"
-              )}>Sonity</span>
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className={cn(
+          "fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300",
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        onClick={onClose}
+      />
+
+      {/* Sidebar */}
+      <div
+        className={cn(
+          "fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out",
+          isOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center space-x-3">
+            <Image
+              src={ASSETS.LOGO.PRIMARY}
+              alt={SITE_CONFIG.NAME}
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-lg object-cover"
+            />
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                {SITE_CONFIG.NAME}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Music Streaming
+              </p>
             </div>
-            <button
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <div className="flex-1 p-6 space-y-2">
+          <h3 className={cn(
+            "text-xs font-bold uppercase tracking-wider mb-4",
+            isDark ? "text-gray-400" : "text-gray-500"
+          )}>
+            Navigation
+          </h3>
+          {navigationItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
               onClick={onClose}
               className={cn(
-                "p-2 rounded-xl transition-colors",
-                isDark ? "hover:bg-white/10 text-gray-300" : "hover:bg-gray-100 text-gray-600"
+                "flex items-center gap-4 p-4 rounded-2xl transition-colors group",
+                isDark ? "hover:bg-white/10" : "hover:bg-gray-50"
               )}
             >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+              <item.icon className={cn(
+                "w-5 h-5 transition-colors",
+                isDark 
+                  ? "text-gray-400 group-hover:text-violet-400" 
+                  : "text-gray-600 group-hover:text-violet-600"
+              )} />
+              <span className={cn(
+                "font-medium transition-colors",
+                isDark ? "text-gray-200" : "text-gray-900"
+              )}>
+                {item.label}
+              </span>
+              <ChevronRight className={cn(
+                "w-4 h-4 transition-colors ml-auto",
+                isDark 
+                  ? "text-gray-400 group-hover:text-violet-400" 
+                  : "text-gray-600 group-hover:text-violet-600"
+              )} />
+            </Link>
+          ))}
+        </div>
 
-          {/* User Section */}
-          {session?.user && (
-            <div className="p-6 border-b border-gray-200/50">
-              <a
-                href="https://account.veliessa.com/profile"
-                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors group"
-                onClick={onClose}
-              >
-                <div className="relative">
-                  {session.user.avatar ? (
-                    <Image
-                      src={session.user.avatar}
-                      alt={session.user.name || 'User'}
-                      width={48}
-                      height={48}
-                      className="rounded-full"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                      <User className="w-6 h-6 text-white" />
-                    </div>
-                  )}
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 truncate">
-                    {session.user.name || 'User'}
-                  </p>
-                  <p className="text-sm text-gray-500 truncate">
-                    {session.user.email}
-                  </p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
-              </a>
-            </div>
-          )}
-
-          {/* Navigation */}
-          <div className="flex-1 p-6 space-y-2">
-            <h3 className={cn(
-              "text-xs font-bold uppercase tracking-wider mb-4",
-              isDark ? "text-gray-400" : "text-gray-500"
+        {/* Footer */}
+        <div className="p-6 border-t border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between">
+            <span className={cn(
+              "text-sm font-medium",
+              isDark ? "text-gray-300" : "text-gray-700"
             )}>
-              Navigation
-            </h3>
-            {navigationItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={cn(
-                  "flex items-center gap-4 p-4 rounded-2xl transition-colors group",
-                  isDark ? "hover:bg-white/10" : "hover:bg-gray-50"
-                )}
-              >
-                <item.icon className={cn(
-                  "w-5 h-5 transition-colors",
-                  isDark 
-                    ? "text-gray-400 group-hover:text-violet-400" 
-                    : "text-gray-600 group-hover:text-violet-600"
-                )} />
-                <span className={cn(
-                  "font-medium transition-colors",
-                  isDark 
-                    ? "text-gray-200 group-hover:text-violet-400" 
-                    : "text-gray-900 group-hover:text-violet-600"
-                )}>
-                  {item.label}
-                </span>
-              </Link>
-            ))}
-          </div>
-
-          {/* Bottom Actions */}
-          <div className="p-6 border-t border-gray-200/50 space-y-2">
-            {/* Theme Toggle - Always visible */}
+              Theme
+            </span>
             <button
               onClick={toggleTheme}
               className={cn(
-                "flex items-center gap-4 p-4 w-full rounded-2xl transition-all",
+                "p-2 rounded-lg transition-colors",
                 isDark 
-                  ? "bg-gray-800 hover:bg-gray-700 text-white"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                  ? "bg-gray-800 text-yellow-400 hover:bg-gray-700" 
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               )}
             >
-              {isDark ? (
-                <>
-                  <Sun className="w-5 h-5 text-yellow-400" />
-                  <span className="font-medium">Light Mode</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="w-5 h-5 text-indigo-600" />
-                  <span className="font-medium">Dark Mode</span>
-                </>
-              )}
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-
-            <Link
-              href="/premium"
-              onClick={onClose}
-              className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white hover:from-violet-600 hover:to-fuchsia-600 transition-all"
-            >
-              <Crown className="w-5 h-5" />
-              <span className="font-semibold">Upgrade to Premium</span>
-            </Link>
-            
-            <Link
-              href="/settings"
-              onClick={onClose}
-              className="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors"
-            >
-              <Settings className="w-5 h-5 text-gray-600" />
-              <span className="font-medium text-gray-900">Settings</span>
-            </Link>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

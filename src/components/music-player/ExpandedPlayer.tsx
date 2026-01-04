@@ -6,6 +6,7 @@ import { PlayerState, PlayerActions } from "./types";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useViewportHeight } from "@/hooks/useViewportHeight";
+import { ASSETS } from "@/utils/constants/assets.constants";
 import { 
   ChevronDown, List, Heart, Share2, Play, Pause, 
   SkipBack, SkipForward, Shuffle, Repeat, Timer
@@ -58,14 +59,42 @@ export default function ExpandedPlayer({
       className
     )} style={{
       // Lock the expanded player height to the real visual viewport height when available
-      height: viewportHeight ? `${viewportHeight}px` : '100vh',
-      background: 'transparent'
+      height: viewportHeight ? `${viewportHeight}px` : '100vh'
     }}>
+      {/* iOS 26 Glass Background Effects */}
+      <div className="absolute inset-0 z-0 backdrop-blur-3xl">
+        {track?.coverArt?.default && (
+          <>
+            {/* Album art backdrop with iOS 26 effects */}
+            <div
+              className="absolute inset-0 scale-125"
+              style={{
+                backgroundImage: `url(${track.coverArt.default})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                filter: "blur(80px) saturate(150%)",
+                opacity: 0.15,
+              }}
+            />
+            {/* Multi-layer gradient overlays */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/80 to-white/75" />
+            <div className="absolute inset-0 bg-gradient-to-t from-violet-500/8 via-transparent to-fuchsia-500/8" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.12),transparent_50%),radial-gradient(ellipse_at_bottom,rgba(236,72,153,0.12),transparent_50%)]" />
+          </>
+        )}
+        {!track?.coverArt?.default && (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-gray-50/90" />
+            <div className="absolute inset-0 bg-gradient-to-t from-violet-500/8 via-transparent to-fuchsia-500/8" />
+          </>
+        )}
+      </div>
       {/* App Header - Responsive and Mobile Optimized */}
       <div className={cn(
-        "relative z-30 transition-all duration-500 ease-out",
+        "relative z-30 transition-all duration-500 ease-out backdrop-blur-2xl",
         "pt-[env(safe-area-inset-top,20px)] px-4 sm:px-6",
         "h-16 sm:h-20 flex items-center justify-between",
+        "bg-white/50 border-b border-white/30",
         headerVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       )}>
         <button
@@ -79,10 +108,14 @@ export default function ExpandedPlayer({
         
         {/* App Logo/Name - Centered and Responsive */}
         <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
-          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--accent-primary)]" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-          </svg>
-          <span className="text-[var(--text-primary)] text-base sm:text-lg font-bold">Sonity</span>
+          <Image
+            src={ASSETS.LOGO.PRIMARY}
+            alt="Sonity"
+            width={24}
+            height={24}
+            className="w-5 h-5 sm:w-6 sm:h-6"
+          />
+          <span className="text-gray-900 text-base sm:text-lg font-bold">Sonity</span>
         </div>
 
         <button
@@ -96,7 +129,7 @@ export default function ExpandedPlayer({
       </div>
 
       {/* Album Art - Sized by available viewport height so controls stay visible */}
-      <div className="flex items-center justify-center px-4 sm:px-8 py-4 sm:py-8">
+      <div className="relative z-10 flex items-center justify-center px-4 sm:px-8 py-4 sm:py-8">
         <div
           className="album-art-swipe-area relative aspect-square"
           style={{
@@ -104,7 +137,7 @@ export default function ExpandedPlayer({
             maxWidth: artSize ? `${artSize}px` : undefined,
           }}
         >
-          <div className="w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden relative shadow-lg">
+          <div className="w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden relative shadow-[0_32px_64px_rgba(0,0,0,0.15)] ring-4 ring-white/30 backdrop-blur-xl">
             {track?.coverArt?.default ? (
               <Image
                 src={track.coverArt.default}
@@ -126,7 +159,7 @@ export default function ExpandedPlayer({
       </div>
 
       {/* Track Info - Grid Auto */}
-      <div className="px-4 sm:px-8 py-2 sm:py-3 text-center mx-auto max-w-[520px]">
+      <div className="relative z-10 px-4 sm:px-8 py-2 sm:py-3 text-center mx-auto max-w-[520px]">
         <h1 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] mb-1 sm:mb-2 line-clamp-1">
           {track.title}
         </h1>
@@ -136,7 +169,7 @@ export default function ExpandedPlayer({
       </div>
 
       {/* Progress Bar - Grid Auto */}
-      <div className="px-4 sm:px-8 py-1 sm:py-2 mb-1 sm:mb-2 mx-auto max-w-[520px] w-full">
+      <div className="relative z-10 px-4 sm:px-8 py-1 sm:py-2 mb-1 sm:mb-2 mx-auto max-w-[520px] w-full">
         <ProgressBar
           state={state}
           actions={actions}
@@ -145,15 +178,15 @@ export default function ExpandedPlayer({
       </div>
 
       {/* Controls - Grid Auto with Proper Spacing (iOS-like layout) */}
-      <div className="px-4 sm:px-8 pb-6 sm:pb-8 pt-3 sm:pt-4 space-y-3 sm:space-y-5 mx-auto max-w-[520px] w-full">
+      <div className="relative z-10 px-4 sm:px-8 pb-6 sm:pb-8 pt-3 sm:pt-4 space-y-3 sm:space-y-5 mx-auto max-w-[520px] w-full">
         {/* Secondary Controls - evenly spaced row */}
         <div className="mx-auto w-full max-w-[380px] flex items-center justify-between">
           <button
             onClick={actions.toggleShuffle}
             className={cn(
-              "p-3 rounded-2xl transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
-              "hover:bg-[var(--bg-secondary)]",
-              state.isShuffled ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)]"
+              "p-3 rounded-2xl transition-all duration-300 min-w-[44px] min-h-[44px] flex items-center justify-center backdrop-blur-2xl",
+              "hover:bg-white/70 active:scale-95",
+              state.isShuffled ? "text-violet-600 bg-white/60" : "text-gray-600 bg-white/40"
             )}
             style={{ touchAction: 'manipulation' }}
             aria-label="Shuffle"
@@ -164,9 +197,9 @@ export default function ExpandedPlayer({
           <button
             onClick={actions.toggleLike}
             className={cn(
-              "p-3 rounded-2xl transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
-              "hover:bg-[var(--bg-secondary)]",
-              state.isLiked ? "text-red-500" : "text-[var(--text-secondary)]"
+              "p-3 rounded-2xl transition-all duration-300 min-w-[44px] min-h-[44px] flex items-center justify-center backdrop-blur-2xl",
+              "hover:bg-white/70 active:scale-95",
+              state.isLiked ? "text-red-500 bg-white/60" : "text-gray-600 bg-white/40"
             )}
             style={{ touchAction: 'manipulation' }}
             aria-label="Like"
@@ -180,9 +213,9 @@ export default function ExpandedPlayer({
           <button
             onClick={onShowTimer}
             className={cn(
-              "p-3 rounded-2xl transition-colors relative min-w-[44px] min-h-[44px] flex items-center justify-center",
-              "hover:bg-[var(--bg-secondary)]",
-              remainingTime ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)]"
+              "p-3 rounded-2xl transition-all duration-300 relative min-w-[44px] min-h-[44px] flex items-center justify-center backdrop-blur-2xl",
+              "hover:bg-white/70 active:scale-95",
+              remainingTime ? "text-violet-600 bg-white/60" : "text-gray-600 bg-white/40"
             )}
             style={{ touchAction: 'manipulation' }}
             aria-label="Timer"
@@ -195,7 +228,7 @@ export default function ExpandedPlayer({
 
           <button
             onClick={onShare}
-            className="p-3 rounded-2xl text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-3 rounded-2xl text-gray-600 bg-white/40 hover:bg-white/70 hover:text-gray-900 transition-all duration-300 min-w-[44px] min-h-[44px] flex items-center justify-center backdrop-blur-2xl active:scale-95"
             style={{ touchAction: 'manipulation' }}
             aria-label="Share"
           >
@@ -205,9 +238,9 @@ export default function ExpandedPlayer({
           <button
             onClick={actions.cycleRepeatMode}
             className={cn(
-              "p-3 rounded-2xl relative transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
-              "hover:bg-[var(--bg-secondary)]",
-              state.repeatMode !== 'none' ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)]"
+              "p-3 rounded-2xl relative transition-all duration-300 min-w-[44px] min-h-[44px] flex items-center justify-center backdrop-blur-2xl",
+              "hover:bg-white/70 active:scale-95",
+              state.repeatMode !== 'none' ? "text-violet-600 bg-white/60" : "text-gray-600 bg-white/40"
             )}
             style={{ touchAction: 'manipulation' }}
             aria-label="Repeat"
@@ -225,7 +258,7 @@ export default function ExpandedPlayer({
         <div className="mx-auto w-full max-w-[300px] flex items-center justify-center gap-4 sm:gap-6 mt-1 sm:mt-2">
           <button
             onClick={actions.skipToPrevious}
-            className="p-3 sm:p-4 rounded-2xl text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-3 sm:p-4 rounded-2xl text-gray-800  transition-all duration-300 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-95"
             style={{ touchAction: 'manipulation' }}
             aria-label="Previous"
           >
@@ -235,7 +268,7 @@ export default function ExpandedPlayer({
           <button
             onClick={actions.togglePlayPause}
             disabled={state.isLoading}
-            className="p-4 sm:p-6 rounded-full text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors disabled:opacity-50 min-w-[56px] min-h-[56px] sm:min-w-[72px] sm:min-h-[72px] flex items-center justify-center"
+            className="p-4 sm:p-6 rounded-full text-white bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 transition-all duration-300 disabled:opacity-50 min-w-[56px] min-h-[56px] sm:min-w-[72px] sm:min-h-[72px] flex items-center justify-center backdrop-blur-2xl active:scale-95 shadow-lg shadow-violet-500/30"
             style={{ touchAction: 'manipulation' }}
             aria-label="Play/Pause"
           >
@@ -250,7 +283,7 @@ export default function ExpandedPlayer({
 
           <button
             onClick={actions.skipToNext}
-            className="p-3 sm:p-4 rounded-2xl text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-3 sm:p-4 rounded-2xl text-gray-800  transition-all duration-300 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-95"
             style={{ touchAction: 'manipulation' }}
             aria-label="Next"
           >

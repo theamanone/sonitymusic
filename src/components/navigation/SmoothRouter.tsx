@@ -2,7 +2,6 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
 
 interface SmoothRouterProps {
   children: React.ReactNode;
@@ -11,7 +10,6 @@ interface SmoothRouterProps {
 export default function SmoothRouter({ children }: SmoothRouterProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session, status } = useSession();
 
   const handleNavigation = useCallback((url: string) => {
     // Add loading state and smooth transitions
@@ -43,24 +41,23 @@ export default function SmoothRouter({ children }: SmoothRouterProps) {
 
   // Preload critical routes
   useEffect(() => {
-    if (status === 'authenticated') {
-      router.prefetch('/');
-      router.prefetch('/channel');
-      router.prefetch('/subscription');
-    }
-  }, [router, status]);
+    // Preload main routes for better UX
+    router.prefetch('/');
+    router.prefetch('/trending');
+    router.prefetch('/library');
+    router.prefetch('/settings');
+  }, [router]);
 
   // Handle invalid routes
   useEffect(() => {
-    const invalidRoutes = ['/home', '/videos', '/browse'];
-    if (invalidRoutes.includes(pathname)) {
+    // Redirect invalid routes to home
+    const validRoutes = ['/', '/trending', '/library', '/settings', '/search'];
+    const isValidRoute = validRoutes.some(route => pathname.startsWith(route));
+    
+    if (!isValidRoute && pathname !== '/') {
       router.replace('/');
     }
   }, [pathname, router]);
 
-  return (
-    <div className="smooth-router">
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 }
